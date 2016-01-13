@@ -57,4 +57,12 @@
 		return module.defineDerivedClass(proto, this);
 	};
 
+	// =========================================================================
+	// generate id
+	// =========================================================================
+	var maxId = 0;
+	module.generateId = function () {
+		return '#' + maxId++;
+	};
+
 })();
