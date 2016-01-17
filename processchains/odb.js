@@ -1,225 +1,234 @@
 /* global window,  console */
-(function() {
+(function () {
 
-    // =========================================================================
-    // import other modules + define own module
-    // =========================================================================
-    var core = window.pc.core;
-    var module = window.pc.odb = {};
+	// =========================================================================
+	// import other modules + define own module
+	// =========================================================================
+	var core = window.pc.core;
+	var graphs = window.pc.graphs;
+	var module = window.pc.odb = {};
 
-    // =========================================================================
-    // object database
-    // =========================================================================    
-    module.ODB = core.defineClass({
+	// =========================================================================
+	// object database
+	// =========================================================================    
+	module.DB = core.defineClass({
 
-        init: function(json) {
-            this.objectMap = {};
-            this.serializedObjectMap = {};
-            this.maxId = 0;
-            if (json) {
-                this.fromJson(json);
-            }
-        },
+		init: function (json) {
+			this.objectMap = {};
+			this.serializedObjectMap = {};
+			this.maxId = 0;
+			if (json) {
+				this.fromJson(json);
+			}
+		},
 
-        generateId: function() {
-            return ++this.maxId;
-        },
+		generateId: function () {
+			return ++this.maxId;
+		},
 
-        getType: function(obj) {
-            if (typeof(obj) === 'string') return 'simple';
-            if (typeof(obj) === 'number') return 'simple';
-            if (typeof(obj) === 'boolean') return 'simple';
-            if (typeof(obj) === 'object') {
-                if (Object.prototype.toString.call(obj) === '[object Array]') return 'list';
-                return 'object';
-            }
-            throw "Not supported type:" + typeof(obj);
-        },
+		getType: function (obj) {
+			if (obj === undefined) {
+				return 'simple';
+			}
+			if (typeof (obj) === 'string') return 'simple';
+			if (typeof (obj) === 'number') return 'simple';
+			if (typeof (obj) === 'boolean') return 'simple';
+			if (typeof (obj) === 'function') return 'function';
+			if (typeof (obj) === 'object') {
+				if (Object.prototype.toString.call(obj) === '[object Array]') return 'list';
+				return 'object';
+			}
+			throw "Not supported type:" + typeof (obj);
+		},
 
-        put: function(obj, processingMap) {
+		put: function (obj, processingMap) {
 
-            // already processed?
-            obj.id = obj.id || this.generateId();
-            processingMap = processingMap || {};
-            if (processingMap[obj.id]) {
-                return;
-            }
-            processingMap[obj.id] = true;
+			// already processed?
+			obj.id = obj.id || this.generateId();
+			processingMap = processingMap || {};
+			if (processingMap[obj.id]) {
+				return;
+			}
+			processingMap[obj.id] = true;
 
-            // update object in maps
-            this.objectMap[obj.id] = obj;
-            var serializedObject = {
-                type: obj.type || this.getType(obj)
-            };
-            this.serializedObjectMap[obj.id] = serializedObject;
+			// update object in maps
+			this.objectMap[obj.id] = obj;
+			var serializedObject = {
+				type: obj.type || this.getType(obj)
+			};
+			this.serializedObjectMap[obj.id] = serializedObject;
 
-            // process properties of object
-            for (var property in obj) {
-                if (!obj.hasOwnProperty(property)) {
-                    continue;
-                }
-                var value = obj[property];
-                switch (this.getType(value)) {
-                    case 'simple':
-                        serializedObject[property] = value;
-                        break;
-                    case 'object':
-                    case 'list':
-                        this.put(value, processingMap);
-                        serializedObject[property] = '#' + value.id;
-                        break;
-                }
-            }
-        },
+			// process properties of object
+			for (var property in obj) {
+				if (!obj.hasOwnProperty(property)) {
+					continue;
+				}
+				var value = obj[property];
+				switch (this.getType(value)) {
+				case 'simple':
+					serializedObject[property] = value;
+					break;
+				case 'object':
+				case 'list':
+					if (value !== null) {
+						this.put(value, processingMap);
+						serializedObject[property] = '#' + value.id;
+					} else {
+						serializedObject[property] = null;
+					}
+					break;
+				}
+			}
+		},
 
-        get: function(id) {
-            return this.objectMap[id];
-        },
+		get: function (id) {
+			return this.objectMap[id];
+		},
 
-        toJson: function() {
-            return this.serializedObjectMap;
-        },
+		delete: function (obj, check) {
 
-        fromJson: function(json) {
-            this.serializedObjectMap = json;
-            for (var id in this.serializedObjectMap) {
-                var serializedObject = this.serializedObjectMap[id];
-                this.deserializeObject(serializedObject);
-            }
-            return this;
-        },
+			if (!obj) {
+				return;
+			}
 
-        deserializeObject: function(serializedObject) {
+			var serializedObj = this.serializedObjectMap[obj.id];
+			delete this.objectMap[obj.id];
+			delete this.serializedObjectMap[obj.id];
+			for (var property in serializedObj) {
+				var value = serializedObj[property];
+				if (value && value[0] === '#') {
+					var id = value.slice(1);
+					if (check && !check(this.objectMap[id])) {
+						continue;
+					}
+					this.delete(this.objectMap[id], check);
+				}
+			}
+		},
 
-            // already deserialized?
-            var id = serializedObject.id;
-            var object = this.objectMap[id];
-            if (object) {
-                return object;
-            }
+		toJson: function () {
+			return JSON.parse(JSON.stringify(this.serializedObjectMap));
+		},
 
-            // update max id
-            var intId = parseInt(id);
-            if (!isNaN(intId)) {
-                this.maxId = Math.max(intId, this.maxId);
-            }
+		fromJson: function (json) {
+			var processingMap = {};
+			this.serializedObjectMap = json;
+			for (var id in this.serializedObjectMap) {
+				var serializedObject = this.serializedObjectMap[id];
+				this.deserializeObject(serializedObject, processingMap);
+			}
+			return this;
+		},
 
-            // create object
-            switch (serializedObject.type) {
-                case 'object':
-                    object = {
-                        id: id
-                    };
-                    break;
-                case 'list':
-                    object = [];
-                    object.id = id;
-                    break;
-                default:
-                    object = Object.create(module[serializedObject.type].prototype);
-            }
-            this.objectMap[id] = object;
+		deserializeObject: function (serializedObject, processingMap) {
 
-            // deserialize properties of object
-            for (var property in serializedObject) {
-                var value = serializedObject[property];
-                if (value[0] === '#') {
-                    object[property] = this.deserializeObject(this.serializedObjectMap[value.slice(1)]);
-                } else {
-                    object[property] = value;
-                }
-            }
+			// already processed?
+			var id = serializedObject.id;
+			if (processingMap[id]) {
+				return this.objectMap[id];
+			}
+			processingMap[id] = true;
 
-            return object;
-        }
+			// update max id
+			var intId = parseInt(id);
+			if (!isNaN(intId)) {
+				this.maxId = Math.max(intId, this.maxId);
+			}
 
-    });
+			// create object if necessary
+			var object = this.objectMap[id];
+			if (!object) {
+				switch (serializedObject.type) {
+				case 'object':
+					object = {
+						id: id
+					};
+					break;
+				case 'list':
+					object = [];
+					object.id = id;
+					break;
+				default:
+					var constructorFunction = this.getByPackagePath(serializedObject.type);
+					object = Object.create(constructorFunction.prototype);
+				}
+				this.objectMap[id] = object;
+			}
 
-    // =========================================================================
-    // test
-    // =========================================================================    
+			// deserialize properties of object
+			for (var property in serializedObject) {
+				var value = serializedObject[property];
+				if (value && value[0] === '#') {
+					value = this.deserializeObject(this.serializedObjectMap[value.slice(1)], processingMap);
+				}
+				object[property] = value;
+			}
 
-    module.Step = core.defineClass({
-        init: function() {}
-    });
+			return object;
+		},
 
+		getByPackagePath: function (path) {
+			var parts = path.split('.');
+			var obj = window;
+			for (var i = 0; i < parts.length; ++i) {
+				var part = parts[i];
+				obj = obj[part];
+			}
+			return obj;
+		},
 
-    module.PrintStep = module.Step.derive({
-        type: 'PrintStep',
-        init: function(message) {
-            module.Step.prototype.init.apply(this, arguments);
-            this.message = message;
-        },
-        execute: function() {
-            console.log(this.message);
-        }
-    });
+		debugReload: function () {
+			var json = this.toJson();
+			this.init.apply(this, [json]);
+		},
 
-    module.SerialStep = module.Step.derive({
-        type: 'SerialStep',
-        init: function(options) {
-            module.Step.prototype.init.apply(this, arguments);
-            this.steps = options.steps || [];
-        },
-        execute: function() {
-            for (var i = 0; i < this.steps.length; ++i) {
-                var step = this.steps[i];
-                step.execute();
-            }
-        }
-    });
+		debugStatistic: function () {
+			var statistic = {};
+			var type;
+			for (var id in this.serializedObjectMap) {
+				var obj = this.serializedObjectMap[id];
+				type = obj.type;
+				var count = statistic[type];
+				count = count !== undefined ? count + 1 : 1;
+				statistic[type] = count;
+			}
+			console.log('--');
+			for (type in statistic) {
+				console.log(type + ':' + statistic[type]);
+			}
+			console.log('--');
+		},
 
+		debugGraph: function () {
+			var graph = new graphs.Graph();
+			var id, obj;
+			// create nodes
+			for (id in this.serializedObjectMap) {
+				obj = this.serializedObjectMap[id];
+				if (obj.type === 'pc.asynchron.Listener') {
+					continue;
+				}
+				graph.createNode(id, obj.type);
+			}
+			// create links
+			for (id in this.serializedObjectMap) {
+				obj = this.serializedObjectMap[id];
+				var sourceNode = graph.getNode(id);
+				for (var property in obj) {
+					var value = obj[property];
+					if (value && value[0] === '#') {
+						var targetNode = graph.getNode(value.slice(1));
+						if (obj.type === 'pc.asynchron.Listener' || this.serializedObjectMap[value.slice(1)].type === 'pc.asynchron.Listener') {
+							continue;
+						}
+						graph.createLink(sourceNode, targetNode);
+					}
+				}
+			}
+			// show graph
+			new graphs.VizGraphViewer(graph, graphs.createContainer('graph'));
+		}
 
-    var chain = new module.SerialStep({
-        steps: [new module.PrintStep('A'), new module.PrintStep('B')]
-    });
-    chain.execute();
-
-
-    module.A = core.defineClass({
-        type: 'A',
-        init: function(name, b) {
-            this.name = name;
-            this.b = b;
-            this.b2 = {
-                b: b
-            };
-            this.list = [b, 2, 3];
-        }
-    });
-
-    module.B = core.defineClass({
-        type: 'B',
-        init: function(name) {
-            this.name = name;
-        }
-    });
-
-    var b = new module.B('b');
-    var a = new module.A('a', b);
-    a.id = 'hugo';
-
-    var db = new module.ODB();
-    db.put(a);
-
-
-    var x1 = {
-        id: 'x1'
-    };
-    var x2 = {
-        id: 'x2'
-    };
-    var x3 = {
-        id: 'x3'
-    };
-    x1.p = x2;
-    x2.p = x3;
-    x3.p = x1;
-    db.put(x1);
-
-    var json = db.toJson();
-    db = new module.ODB(json);
-    var new_x1 = db.get('x1');
-
+	});
 
 })();
