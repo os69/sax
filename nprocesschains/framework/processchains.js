@@ -16,16 +16,29 @@ exports.Step = asynchron.Deferred.derive({
 	type: 'framework.processchains.Step',
 	init: function () {
 		asynchron.Deferred.prototype.init.apply(this, arguments);
+		this.parent = null;
 	},
 	collectExecutableSteps: function (steps) {
 		if (this.status === this.INITIAL) {
 			steps.push(this);
 		}
+	},
+	getParent: function () {
+		return this.parent;
+	},
+	getRoot: function () {
+		if (!this.parent) {
+			return this;
+		}
+		return this.parent.getRoot();
+	},
+	getData: function () {
+		return this.getRoot().data;
 	}
 });
 
 // =========================================================================
-// serial step which execute sub steps in sequential
+// serial step which execute sub steps sequentially
 // =========================================================================
 exports.SerialStep = exports.Step.derive({
 	type: 'framework.processchains.SerialStep',
@@ -36,6 +49,7 @@ exports.SerialStep = exports.Step.derive({
 			var step = this.steps[i];
 			step.done(this, 'subStepDoneHandler');
 			step.progress(this, 'subStepProgressHandler');
+			step.parent = this;
 		}
 	},
 	subStepProgressHandler: function () {
@@ -65,6 +79,61 @@ exports.SerialStep = exports.Step.derive({
 				break;
 			}
 		}
+	}
+});
+
+// =========================================================================
+// parallel step which execute sub steps in parallel
+// =========================================================================
+exports.ParallelStep = exports.Step.derive({
+	type: 'framework.processchains.ParallelStep',
+	init: function (options) {
+		exports.Step.prototype.init.apply(this, arguments);
+		this.steps = options.steps || [];
+		for (var i = 0; i < this.steps.length; ++i) {
+			var step = this.steps[i];
+			step.done(this, 'subStepDoneHandler');
+			step.progress(this, 'subStepProgressHandler');
+			step.parent = this;
+		}
+	},
+	subStepProgressHandler: function () {
+		this.notify();
+	},
+	subStepDoneHandler: function () {
+		var resolved = true;
+		for (var i = 0; i < this.steps.length; ++i) {
+			var step = this.steps[i];
+			if (step.status !== this.RESOLVED) {
+				resolved = false;
+				break;
+			}
+		}
+		if (resolved) {
+			this.resolve();
+		}
+	},
+	collectExecutableSteps: function (steps) {
+		if (this.status === this.RESOLVED) {
+			return;
+		}
+		for (var i = 0; i < this.steps.length; ++i) {
+			var step = this.steps[i];
+			if (step.status !== this.RESOLVED) {
+				step.collectExecutableSteps(steps);
+			}
+		}
+	}
+});
+
+// =========================================================================
+// process chain 
+// =========================================================================
+exports.ProcessChain = exports.SerialStep.derive({
+	type: 'framework.processchains.ProcessChain',
+	init: function (options) {
+		exports.SerialStep.prototype.init.apply(this, arguments);
+		this.data = options.data || null;
 	}
 });
 

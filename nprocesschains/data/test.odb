@@ -1,1 +1,1 @@
-{"1":{"type":"list","id":1},"controller":{"type":"framework.processchains.Controller","chains":"#1","id":"controller"}}
+{"1":{"type":"list","id":1},"controller":{"type":"framework.processchains.Controller","chains":"#1","id":"controller"},"vizFilePath":{"type":"object","id":"vizFilePath","path":"dbgraph","counter":15}}

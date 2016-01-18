@@ -6,6 +6,7 @@
 // =========================================================================
 var core = require('./core');
 var fs = require('fs');
+var graphs = require('./graphs');
 var exports = module.exports = {};
 
 // =========================================================================
@@ -120,13 +121,17 @@ exports.DB = core.defineClass({
 		}
 	},
 
-	toJson: function () {
+	update: function () {
 		var processingMap = {};
 		for (var id in this.objectMap) {
 			var obj = this.objectMap[id];
 			this.put(obj, processingMap);
 		}
-		return JSON.parse(JSON.stringify(this.serializedObjectMap));
+	},
+
+	toJson: function () {
+		this.update();
+		return JSON.parse(JSON.stringify(this.serializedObjectMap)); //TODO
 	},
 
 	fromJson: function (json) {
@@ -210,11 +215,6 @@ exports.DB = core.defineClass({
 		return module[parts[parts.length - 1]];
 	},
 
-	debugReload: function () {
-		var json = this.toJson();
-		this.init.apply(this, [json]);
-	},
-
 	debugStatistic: function () {
 		var statistic = {};
 		var type;
@@ -225,11 +225,48 @@ exports.DB = core.defineClass({
 			count = count !== undefined ? count + 1 : 1;
 			statistic[type] = count;
 		}
-		console.log('--');
+		console.log('--odb statistic begin');
 		for (type in statistic) {
 			console.log(type + ':' + statistic[type]);
 		}
-		console.log('--');
+		console.log('--odb statistic end');
+	},
+
+	debugGraph: function (path, cb) {
+		var graph = new graphs.Graph();
+		var id, obj;
+		// update
+		this.update();
+		// create nodes
+		for (id in this.serializedObjectMap) {
+			obj = this.serializedObjectMap[id];
+			if (obj.type === 'framework.asynchron.Listener') {
+				continue;
+			}
+			graph.createNode(id, obj.type);
+		}
+		// create links
+		for (id in this.serializedObjectMap) {
+			obj = this.serializedObjectMap[id];
+			var sourceNode = graph.getNode(id);
+			for (var property in obj) {
+				var value = obj[property];
+				if (value && value[0] === '#') {
+					var targetObj = this.serializedObjectMap[value.slice(1)];
+					var targetNode = graph.getNode(value.slice(1));
+					if (property === 'listeners') {
+						continue;
+					}
+					if (obj.type === 'framework.asynchron.Listener' || targetObj.type === 'framework.asynchron.Listener') {
+						continue;
+					}
+					graph.createLink(sourceNode, targetNode, property);
+				}
+			}
+		}
+		// show graph
+		var vizGraph = new graphs.VizGraph(graph);
+		vizGraph.save(path, cb);
 	}
 
 });
