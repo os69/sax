@@ -29,7 +29,7 @@ var generateVizGraph = function () {
 var db = new odb.DB();
 db.load('../data/test.odb', function (db) {
 
-    // start process step execution
+    // pass control to controller
     var controller = db.get('controller');
     controller.run(db);
 

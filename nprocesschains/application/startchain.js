@@ -21,20 +21,20 @@ var controller = new processchains.Controller();
 //    finished)
 // =========================================================================
 var chain = new processchains.ProcessChain({
-	steps: [
+    steps: [
 		new processchains.ParallelStep({
-			steps: [new steps.AddStep(1),
+            steps: [new steps.AddStep(1),
 					new steps.AddStep(10)]
-		}),
+        }),
 		new processchains.SerialStep({
-			steps: [new steps.AddStep(1),
+            steps: [new steps.AddStep(1),
 					new steps.AddStep(10)]
-		}),
+        }),
 		new steps.SubChainStep(),
 		new steps.PrintStep()],
-	data: {
-		number: 1
-	}
+    data: {
+        number: 1
+    }
 });
 controller.addChain(chain);
 
@@ -43,14 +43,14 @@ controller.addChain(chain);
 // chain for each workload item
 // =========================================================================
 var chain = new processchains.ProcessChain({
-	steps: [new steps.WorkloadStep()],
-	data: {
-		workload: [{
-			number: 1
+    steps: [new steps.ProcessChainGeneratorStep()],
+    data: {
+        workload: [{
+            number: 1
 		}, {
-			number: 2
+            number: 2
 		}]
-	}
+    }
 });
 controller.addChain(chain);
 
