@@ -1,221 +1,221 @@
 /* global window, require, console */
 (function () {
 
-    // =========================================================================
-    // import other modules + define own module
-    // =========================================================================
-    var core = window.odb.core;
-    var module = window.odb.odb = {};
+	// =========================================================================
+	// import other modules + define own module
+	// =========================================================================
+	var core = window.odb.core;
+	var module = window.odb.odb = {};
 
-    // =========================================================================
-    // object database
-    // =========================================================================    
-    module.DB = core.defineClass({
+	// =========================================================================
+	// object database
+	// =========================================================================    
+	module.DB = core.defineClass({
 
-        init: function (json) {
-            this.objectMap = {};
-            this.serializedObjectMap = {};
-            this.maxId = 0;
-            if (json) {
-                this.fromJson(json);
-            }
-        },
+		init: function (json) {
+			this.objectMap = {};
+			this.serializedObjectMap = {};
+			this.processingMap = {};
+			this.maxId = 0;
+			if (json) {
+				this.fromJson(json);
+			}
+			// obj
+			// getId
+			// ser obj
+			// setId
+		},
 
-        generateId: function () {
-            return ++this.maxId;
-        },
+		generateId: function () {
+			return '__' + (++this.maxId);
+		},
 
-        getType: function (obj) {
-            if (obj === undefined) {
-                return 'simple';
-            }
-            if (typeof (obj) === 'string') return 'simple';
-            if (typeof (obj) === 'number') return 'simple';
-            if (typeof (obj) === 'boolean') return 'simple';
-            if (typeof (obj) === 'function') return 'function';
-            if (typeof (obj) === 'object') {
-                if (Object.prototype.toString.call(obj) === '[object Array]') return 'list';
-                return 'object';
-            }
-            throw "Not supported type:" + typeof (obj);
-        },
+		getType: function (obj) {
+			if (obj === undefined) {
+				return 'simple';
+			}
+			if (typeof (obj) === 'string') return 'simple';
+			if (typeof (obj) === 'number') return 'simple';
+			if (typeof (obj) === 'boolean') return 'simple';
+			if (typeof (obj) === 'function') return 'function';
+			if (typeof (obj) === 'object') {
+				if (Object.prototype.toString.call(obj) === '[object Array]') return 'list';
+				return 'object';
+			}
+			throw "Not supported type:" + typeof (obj);
+		},
 
-        put: function () {
+		put: function (id, obj) {
+			obj.id = id;
+			this.objectMap[obj.id] = obj;
+		},
 
-            // parse arguments
-            var obj, processingMap, id;
-            if (typeof (arguments[0]) === 'string') {
-                id = arguments[0];
-                obj = arguments[1];
-                processingMap = arguments[2];
-                obj.id = id;
-            } else {
-                obj = arguments[0];
-                processingMap = arguments[1];
-            }
+		get: function (id) {
+			return this.objectMap[id];
+		},
 
-            // already processed?
-            obj.id = obj.id || this.generateId();
-            processingMap = processingMap || {};
-            if (processingMap[obj.id]) {
-                return;
-            }
-            processingMap[obj.id] = true;
+		clone: function (obj) {
 
-            // update object in maps
-            this.objectMap[obj.id] = obj;
-            var serializedObject = {
-                type: obj.type || this.getType(obj)
-            };
-            this.serializedObjectMap[obj.id] = serializedObject;
+		},
 
-            // process properties of object
-            for (var property in obj) {
-                if (!obj.hasOwnProperty(property)) {
-                    continue;
-                }
-                var value = obj[property];
-                switch (this.getType(value)) {
-                case 'simple':
-                    serializedObject[property] = value;
-                    break;
-                case 'object':
-                case 'list':
-                    if (value !== null) {
-                        this.put(value, processingMap);
-                        serializedObject[property] = '#' + value.id;
-                    } else {
-                        serializedObject[property] = null;
-                    }
-                    break;
-                }
-            }
+		toJson: function () {
+			this.serializedObjectMap = {};
+			this.processingMap = {};
+			for (var id in this.objectMap) {
+				var obj = this.objectMap[id];
+				if (obj.id.slice(0, 2) === '__') {
+					continue;
+				}
+				this.serializeObj(obj);
+			}
+			this.garbageCollection();
+			return this.serializedObjectMap;
+		},
 
-            return this;
-        },
+		garbageCollection: function () {
+			var id;
+			var delIds = [];
+			for (id in this.objectMap) {
+				if (!this.processingMap[id]) {
+					delIds.push(id);
+				}
+			}
+			for (var i = 0; i < delIds.length; ++i) {
+				id = delIds[i];
+				delete this.objectMap[id];
+			}
+		},
 
-        get: function (id) {
-            return this.objectMap[id];
-        },
+		serializeObj: function (obj) {
 
-        delete: function (obj, check) {
+			// generate id
+			obj.id = obj.id || this.generateId();
 
-            if (!obj) {
-                return;
-            }
+			// update processing map
+			if (this.processingMap[obj.id]) {
+				return;
+			}
+			this.processingMap[obj.id] = true;
 
-            var serializedObj = this.serializedObjectMap[obj.id];
-            delete this.objectMap[obj.id];
-            delete this.serializedObjectMap[obj.id];
-            for (var property in serializedObj) {
-                var value = serializedObj[property];
-                if (value && value[0] === '#') {
-                    var id = value.slice(1);
-                    if (check && !check(this.objectMap[id])) {
-                        continue;
-                    }
-                    this.delete(this.objectMap[id], check);
-                }
-            }
-        },
+			// update object map
+			this.objectMap[obj.id] = obj;
 
-        update: function () {
-            var processingMap = {};
-            for (var id in this.objectMap) {
-                var obj = this.objectMap[id];
-                this.put(obj, processingMap);
-            }
-        },
+			// update serialized object map
+			var serializedObject = {
+				type: obj.type || this.getType(obj)
+			};
+			this.serializedObjectMap[obj.id] = serializedObject;
 
-        toJson: function () {
-            this.update();
-            return JSON.parse(JSON.stringify(this.serializedObjectMap)); //TODO
-        },
+			// process properties of object
+			for (var property in obj) {
+				if (!obj.hasOwnProperty(property)) {
+					continue;
+				}
+				var value = obj[property];
+				switch (this.getType(value)) {
+				case 'simple':
+					serializedObject[property] = value;
+					break;
+				case 'object':
+				case 'list':
+					if (value !== null) {
+						this.serializeObj(value);
+						serializedObject[property] = '#' + value.id;
+					} else {
+						serializedObject[property] = null;
+					}
+					break;
+				}
+			}
+			return serializedObject;
+		},
 
-        fromJson: function (json) {
-            var processingMap = {};
-            this.serializedObjectMap = json;
-            for (var id in this.serializedObjectMap) {
-                var serializedObject = this.serializedObjectMap[id];
-                this.deserializeObject(serializedObject, processingMap);
-            }
-            return this;
-        },
+		fromJson: function (json) {
+			this.processingMap = {};
+			this.serializedObjectMap = json;
+			for (var id in this.serializedObjectMap) {
+				var serializedObject = this.serializedObjectMap[id];
+				this.deserializeObject(serializedObject);
+			}
+		},
 
-        deserializeObject: function (serializedObject, processingMap) {
+		deserializeObject: function (serializedObject) {
 
-            // already processed?
-            var id = serializedObject.id;
-            if (processingMap[id]) {
-                return this.objectMap[id];
-            }
-            processingMap[id] = true;
+			// already processed?
+			var id = serializedObject.id;
+			if (this.processingMap[id]) {
+				return this.objectMap[id];
+			}
+			this.processingMap[id] = true;
 
-            // update max id
-            var intId = parseInt(id);
-            if (!isNaN(intId)) {
-                this.maxId = Math.max(intId, this.maxId);
-            }
+			// update max id
+			if (id.slice(0, 2) === '__') {
+				var intId = parseInt(id.slice(2));
+				this.maxId = Math.max(intId, this.maxId);
+			}
 
-            // create object if necessary
-            var object = this.objectMap[id];
-            if (!object) {
-                switch (serializedObject.type) {
-                case 'object':
-                    object = {
-                        id: id
-                    };
-                    break;
-                case 'list':
-                    object = [];
-                    object.id = id;
-                    break;
-                default:
-                    var constructorFunction = this.getByPackagePath(serializedObject.type);
-                    object = Object.create(constructorFunction.prototype);
-                }
-                this.objectMap[id] = object;
-            }
+			// create object if necessary
+			var object = this.objectMap[id];
+			if (!object) {
+				switch (serializedObject.type) {
+				case 'object':
+					object = {};
+					break;
+				case 'list':
+					object = [];
+					break;
+				default:
+					var constructorFunction = this.getByPackagePath(serializedObject.type);
+					object = Object.create(constructorFunction.prototype);
+				}
+				object.id = id;
+				this.objectMap[id] = object;
+			}
 
-            // deserialize properties of object
-            for (var property in serializedObject) {
-                var value = serializedObject[property];
-                if (value && value[0] === '#') {
-                    value = this.deserializeObject(this.serializedObjectMap[value.slice(1)], processingMap);
-                }
-                object[property] = value;
-            }
+			// deserialize properties of object
+			for (var property in serializedObject) {
+				var value = serializedObject[property];
+				if (value && value[0] === '#') {
+					value = this.deserializeObject(this.serializedObjectMap[value.slice(1)]);
+				}
+				object[property] = value;
+			}
 
-            return object;
-        },
+			return object;
+		},
 
-        getByPackagePath: function (path) {
-            var parts = path.split('.');
-            var obj = window;
-            for (var i = 0; i < parts.length; ++i) {
-                var part = parts[i];
-                obj = obj[part];
-            }
-            return obj;
-        },
+		getByPackagePath: function (path) {
+			var parts = path.split('.');
+			var obj = window;
+			for (var i = 0; i < parts.length; ++i) {
+				var part = parts[i];
+				obj = obj[part];
+			}
+			return obj;
+		},
 
-        debugStatistic: function () {
-            var statistic = {};
-            var type;
-            for (var id in this.serializedObjectMap) {
-                var obj = this.serializedObjectMap[id];
-                type = obj.type;
-                var count = statistic[type];
-                count = count !== undefined ? count + 1 : 1;
-                statistic[type] = count;
-            }
-            console.log('--odb statistic begin');
-            for (type in statistic) {
-                console.log(type + ':' + statistic[type]);
-            }
-            console.log('--odb statistic end');
-        }
+		debugReload: function () {
+			var json = this.toJson();
+			this.init.apply(this, [json]);
+		},
 
-    });
+		debugStatistic: function () {
+			var statistic = {};
+			var type;
+			for (var id in this.serializedObjectMap) {
+				var obj = this.serializedObjectMap[id];
+				type = obj.type;
+				var count = statistic[type];
+				count = count !== undefined ? count + 1 : 1;
+				statistic[type] = count;
+			}
+			console.log('--odb statistic begin');
+			for (type in statistic) {
+				console.log(type + ':' + statistic[type]);
+			}
+			console.log('--odb statistic end');
+		}
+
+	});
 
 })();
