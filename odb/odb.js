@@ -12,22 +12,37 @@
 	// =========================================================================    
 	module.DB = core.defineClass({
 
-		init: function (json) {
+		init: function (options) {
+
+			options = options || {};
+
 			this.objectMap = {};
 			this.serializedObjectMap = {};
 			this.processingMap = {};
 			this.maxId = 0;
-			if (json) {
-				this.fromJson(json);
+
+			this.generatedIdPrefix = options.generatedIdPrefix || '__';
+			this.adminProperty = options.adminProperty || '__odb';
+
+			/*if (options.idProperty) {
+				this.getId = function (obj) {
+					return obj[options.idProperty];
+				};
 			}
-			// obj
-			// getId
-			// ser obj
-			// setId
+			if (options.getId) {
+				this.getId = function (obj) {
+					return options.getId.apply(obj, []);
+				};
+			}*/
+
 		},
 
 		generateId: function () {
-			return '__' + (++this.maxId);
+			return this.generatedIdPrefix + (++this.maxId);
+		},
+
+		isGeneratedId: function (id) {
+			return id.slice(0, this.generatedIdPrefix.length) === this.generatedIdPrefix;
 		},
 
 		getType: function (obj) {
@@ -45,27 +60,52 @@
 			throw "Not supported type:" + typeof (obj);
 		},
 
-		put: function (id, obj) {
-			obj.id = id;
-			this.objectMap[obj.id] = obj;
+		getId: function (obj) {
+			return obj[this.adminProperty].id;
+		},
+
+		fillAdminData: function (obj, id) {
+			var adminData = obj[this.adminProperty];
+			if (!adminData) {
+				adminData = {};
+				obj[this.adminProperty] = adminData;
+			}
+			if (!adminData.id) {
+				adminData.id = id || this.generateId(); // TODO id from method
+			}
+			if (!adminData.type) {
+				adminData.type = this.getType(obj); // TODO type from method
+			}
+		},
+
+		put: function () {
+			var obj, id;
+			switch (arguments.length) {
+			case 1:
+				obj = arguments[0];
+				this.fillAdminData(obj);
+				break;
+			case 2:
+				id = arguments[0];
+				obj = arguments[1];
+				this.fillAdminData(obj, id);
+				break;
+			}
+			this.objectMap[this.getId(obj)] = obj;
 		},
 
 		get: function (id) {
 			return this.objectMap[id];
 		},
 
-		clone: function (obj) {
-
-		},
-
 		toJson: function () {
 			this.serializedObjectMap = {};
 			this.processingMap = {};
 			for (var id in this.objectMap) {
-				var obj = this.objectMap[id];
-				if (obj.id.slice(0, 2) === '__') {
+				if (this.isGeneratedId(id)) {
 					continue;
 				}
+				var obj = this.objectMap[id];
 				this.serializeObj(obj);
 			}
 			this.garbageCollection();
@@ -88,23 +128,23 @@
 
 		serializeObj: function (obj) {
 
-			// generate id
-			obj.id = obj.id || this.generateId();
+			// get id
+			this.fillAdminData(obj);
+			var id = this.getId(obj);
 
 			// update processing map
-			if (this.processingMap[obj.id]) {
+			if (this.processingMap[id]) {
 				return;
 			}
-			this.processingMap[obj.id] = true;
+			this.processingMap[id] = true;
 
 			// update object map
-			this.objectMap[obj.id] = obj;
+			this.objectMap[id] = obj;
 
 			// update serialized object map
-			var serializedObject = {
-				type: obj.type || this.getType(obj)
-			};
-			this.serializedObjectMap[obj.id] = serializedObject;
+			var serializedObject = {};
+			serializedObject[this.adminProperty] = obj[this.adminProperty];
+			this.serializedObjectMap[id] = serializedObject;
 
 			// process properties of object
 			for (var property in obj) {
@@ -120,7 +160,7 @@
 				case 'list':
 					if (value !== null) {
 						this.serializeObj(value);
-						serializedObject[property] = '#' + value.id;
+						serializedObject[property] = '#' + this.getId(value);
 					} else {
 						serializedObject[property] = null;
 					}
@@ -142,22 +182,22 @@
 		deserializeObject: function (serializedObject) {
 
 			// already processed?
-			var id = serializedObject.id;
+			var id = this.getId(serializedObject);
 			if (this.processingMap[id]) {
 				return this.objectMap[id];
 			}
 			this.processingMap[id] = true;
 
 			// update max id
-			if (id.slice(0, 2) === '__') {
-				var intId = parseInt(id.slice(2));
+			if (this.isGeneratedId(id)) {
+				var intId = parseInt(id.slice(this.generatedIdPrefix.length));
 				this.maxId = Math.max(intId, this.maxId);
 			}
 
 			// create object if necessary
 			var object = this.objectMap[id];
 			if (!object) {
-				switch (serializedObject.type) {
+				switch (serializedObject[this.adminProperty].type) {
 				case 'object':
 					object = {};
 					break;
@@ -168,7 +208,7 @@
 					var constructorFunction = this.getByPackagePath(serializedObject.type);
 					object = Object.create(constructorFunction.prototype);
 				}
-				object.id = id;
+				object[this.adminProperty] = serializedObject[this.adminProperty];
 				this.objectMap[id] = object;
 			}
 
