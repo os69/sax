@@ -187,6 +187,9 @@
 		A.prototype = {
 			type: 'A',
 			constructor: A,
+			myGetType: function () {
+				return this.type;
+			},
 			init: function (number) {
 				this.number = number;
 			},
@@ -198,8 +201,28 @@
 		var db = new odb.DB({
 			typeProperty: 'type'
 		});
-
 		var a = new A(1);
+		db.put('a', a);
+		db.debugReload();
+		a = db.get('a');
+		check(a.getNumber() === 1);
+
+		db = new odb.DB({
+			getType: 'myGetType'
+		});
+		a = new A(1);
+		db.put('a', a);
+		db.debugReload();
+		a = db.get('a');
+		check(a.getNumber() === 1);
+
+		db = new odb.DB({
+			getType: 'myGetType',
+			createObject: function (type) {
+				return new A();
+			}
+		});
+		a = new A(1);
 		db.put('a', a);
 		db.debugReload();
 		a = db.get('a');
@@ -210,9 +233,9 @@
 	// id and type better
 	// check constrctor pointer
 	// hooks for get id, type, object creation
+	// undefined, null values
 
-
-	//	test1();
+	test1();
 	test2();
 	console.log('finished');
 

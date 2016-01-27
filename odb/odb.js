@@ -9,50 +9,110 @@
 
 	// =========================================================================
 	// object database
-	// =========================================================================    
-	module.DB = core.defineClass({
+	// ========================================================================= 
+	module.DB = function () {
+		this._init.apply(this, arguments);
+	};
 
-		init: function (options) {
+	module.DB.prototype = {
 
-			options = options || {};
+		_init: function (options) {
 
+			// internal 
 			this.objectMap = {};
 			this.serializedObjectMap = {};
 			this.processingMap = {};
 			this.maxId = 0;
 
+			// options
+			options = options || {};
 			this.generatedIdPrefix = options.generatedIdPrefix || '__';
 			this.adminProperty = options.adminProperty || '__odb';
 			this.hooks = {
 				getId: options.getId,
 				idProperty: options.idProperty,
 				getType: options.getType,
-				typeProperty: options.typeProperty
+				typeProperty: options.typeProperty,
+				createObject: options.createObject
 			};
-
-			/*if (options.idProperty) {
-				this.getId = function (obj) {
-					return obj[options.idProperty];
-				};
-			}
-			if (options.getId) {
-				this.getId = function (obj) {
-					return options.getId.apply(obj, []);
-				};
-			}*/
 
 		},
 
-		generateId: function () {
+		put: function () {
+
+			// parse function input parameters
+			var obj, id;
+			switch (arguments.length) {
+			case 1:
+				obj = arguments[0];
+				break;
+			case 2:
+				id = arguments[0];
+				obj = arguments[1];
+				break;
+			}
+
+			// store object 
+			if (this._getType(obj) === 'simple') {
+				// simple type (integer, string, ...) 
+				if (!id) {
+					throw 'No id for ' + obj;
+				}
+				this.objectMap[id] = obj;
+			} else {
+				// object or list
+				this._fillAdminData(obj, id);
+				this.objectMap[this._getId(obj)] = obj;
+			}
+		},
+
+		get: function (id) {
+			return this.objectMap[id];
+		},
+
+		toJson: function () {
+			this.serializedObjectMap = {};
+			this.processingMap = {};
+			for (var id in this.objectMap) {
+				if (this._isGeneratedId(id)) {
+					continue;
+				}
+				var obj = this.objectMap[id];
+				if (this._getType(obj) === 'simple') {
+					this.serializedObjectMap[id] = obj;
+					this.processingMap[id] = true;
+				} else {
+					this._serializeObj(obj);
+				}
+			}
+			this._garbageCollection();
+			return this.serializedObjectMap;
+		},
+
+		fromJson: function (json) {
+			this.processingMap = {};
+			this.serializedObjectMap = json;
+			for (var id in this.serializedObjectMap) {
+				var serializedObject = this.serializedObjectMap[id];
+				if (this._getType(serializedObject) === 'simple') {
+					this.objectMap[id] = serializedObject;
+					this.processingMap[id] = true;
+				} else {
+					this._deserializeObject(serializedObject);
+				}
+			}
+		},
+
+		_generateId: function () {
 			return this.generatedIdPrefix + (++this.maxId);
 		},
 
-		isGeneratedId: function (id) {
+		_isGeneratedId: function (id) {
 			return id.slice(0, this.generatedIdPrefix.length) === this.generatedIdPrefix;
 		},
 
-		getType: function (obj) {
-			if (obj === undefined) {
+		_getType: function (obj) {
+			if (obj === undefined || obj === null) {
 				return 'simple';
 			}
 			if (typeof (obj) === 'string') return 'simple';
@@ -66,18 +126,20 @@
 			throw "Not supported type:" + typeof (obj);
 		},
 
-		getId: function (obj) {
+		_getId: function (obj) {
 			return obj[this.adminProperty].id;
 		},
 
-		fillAdminData: function (obj, id) {
+		_fillAdminData: function (obj, id) {
 
+			// generate admin data object
 			var adminData = obj[this.adminProperty];
 			if (!adminData) {
 				adminData = {};
 				obj[this.adminProperty] = adminData;
 			}
 
+			// set id
 			if (!adminData.id) {
 				adminData.id = id;
 			}
@@ -91,9 +153,10 @@
 				adminData.id = obj[this.hooks.idProperty];
 			}
 			if (!adminData.id) {
-				adminData.id = this.generateId();
+				adminData.id = this._generateId();
 			}
 
+			// set type
 			if (!adminData.type && this.hooks.getType) {
 				var getTypeMethod = obj[this.hooks.getType];
 				if (getTypeMethod) {
@@ -104,76 +167,32 @@
 				adminData.type = obj[this.hooks.typeProperty];
 			}
 			if (!adminData.type) {
-				adminData.type = this.getType(obj);
+				adminData.type = this._getType(obj);
 			}
+
 		},
 
-		put: function () {
-			var obj, id;
-			switch (arguments.length) {
-			case 1:
-				obj = arguments[0];
-
-				break;
-			case 2:
-				id = arguments[0];
-				obj = arguments[1];
-
-				break;
-			}
-			if (this.getType(obj) === 'simple') {
-				if (!id) {
-					throw 'No id for ' + obj;
-				}
-				this.objectMap[id] = obj;
-			} else {
-				this.fillAdminData(obj, id);
-				this.objectMap[this.getId(obj)] = obj;
-			}
-		},
-
-		get: function (id) {
-			return this.objectMap[id];
-		},
-
-		toJson: function () {
-			this.serializedObjectMap = {};
-			this.processingMap = {};
-			for (var id in this.objectMap) {
-				if (this.isGeneratedId(id)) {
-					continue;
-				}
-				var obj = this.objectMap[id];
-				if (this.getType(obj) === 'simple') {
-					this.serializedObjectMap[id] = obj;
-					this.processingMap[id] = true;
-				} else {
-					this.serializeObj(obj);
-				}
-			}
-			this.garbageCollection();
-			return this.serializedObjectMap;
-		},
-
-		garbageCollection: function () {
+		_garbageCollection: function () {
 			var id;
+			// collect unused objects
 			var delIds = [];
 			for (id in this.objectMap) {
 				if (!this.processingMap[id]) {
 					delIds.push(id);
 				}
 			}
+			// deleted unused objects
 			for (var i = 0; i < delIds.length; ++i) {
 				id = delIds[i];
 				delete this.objectMap[id];
 			}
 		},
 
-		serializeObj: function (obj) {
+		_serializeObj: function (obj) {
 
 			// get id
-			this.fillAdminData(obj);
-			var id = this.getId(obj);
+			this._fillAdminData(obj);
+			var id = this._getId(obj);
 
 			// update processing map
 			if (this.processingMap[id]) {
@@ -199,52 +218,34 @@
 					continue;
 				}
 				var value = obj[property];
-				switch (this.getType(value)) {
+				switch (this._getType(value)) {
 				case 'simple':
 					serializedObject[property] = value;
 					break;
 				case 'object':
 				case 'list':
-					if (value !== null) {
-						this.serializeObj(value);
-						serializedObject[property] = '#' + this.getId(value);
-						adminData.referenceProperties[property] = true;
-					} else {
-						serializedObject[property] = null;
-					}
+					this._serializeObj(value);
+					serializedObject[property] = '#' + this._getId(value);
+					adminData.referenceProperties[property] = true;
 					break;
 				}
 			}
 			return serializedObject;
 		},
 
-		fromJson: function (json) {
-			this.processingMap = {};
-			this.serializedObjectMap = json;
-			for (var id in this.serializedObjectMap) {
-				var serializedObject = this.serializedObjectMap[id];
-				if (this.getType(serializedObject) === 'simple') {
-					this.objectMap[id] = serializedObject;
-					this.processingMap[id] = true;
-				} else {
-					this.deserializeObject(serializedObject);
-				}
-			}
-		},
-
-		deserializeObject: function (serializedObject) {
+		_deserializeObject: function (serializedObject) {
 
 			var adminData;
 
 			// already processed?
-			var id = this.getId(serializedObject);
+			var id = this._getId(serializedObject);
 			if (this.processingMap[id]) {
 				return this.objectMap[id];
 			}
 			this.processingMap[id] = true;
 
 			// update max id
-			if (this.isGeneratedId(id)) {
+			if (this._isGeneratedId(id)) {
 				var intId = parseInt(id.slice(this.generatedIdPrefix.length));
 				this.maxId = Math.max(intId, this.maxId);
 			}
@@ -261,8 +262,7 @@
 					object = [];
 					break;
 				default:
-					var constructorFunction = this.getByPackagePath(adminData.type);
-					object = Object.create(constructorFunction.prototype);
+					object = this._createObject(adminData.type);
 				}
 				this.objectMap[id] = object;
 			}
@@ -274,7 +274,7 @@
 			for (var property in serializedObject) {
 				var value = serializedObject[property];
 				if (adminData.referenceProperties[property]) {
-					value = this.deserializeObject(this.serializedObjectMap[value.slice(1)]);
+					value = this._deserializeObject(this.serializedObjectMap[value.slice(1)]);
 				}
 				object[property] = value;
 			}
@@ -282,7 +282,16 @@
 			return object;
 		},
 
-		getByPackagePath: function (path) {
+		_createObject: function (type) {
+			if (this.hooks.createObject) {
+				return this.hooks.createObject.apply(this, [type]);
+			} else {
+				var constructorFunction = this._getByPackagePath(type);
+				return Object.create(constructorFunction.prototype);
+			}
+		},
+
+		_getByPackagePath: function (path) {
 			var parts = path.split('.');
 			var obj = window;
 			for (var i = 0; i < parts.length; ++i) {
@@ -294,7 +303,15 @@
 
 		debugReload: function () {
 			var json = JSON.parse(JSON.stringify(this.toJson()));
-			this.init.apply(this, []);
+			this._init.apply(this, [{
+				generatedIdPrefix: this.generatedIdPrefix,
+				adminProperty: this.adminProperty,
+				getId: this.hooks.getId,
+				idProperty: this.hooks.idProperty,
+				getType: this.hooks.getType,
+				typeProperty: this.hooks.typeProperty,
+				createObject: this.hooks.createObject
+			}]);
 			this.fromJson(json);
 		},
 
@@ -315,6 +332,6 @@
 			console.log('--odb statistic end');
 		}
 
-	});
+	};
 
 })();
