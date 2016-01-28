@@ -4,8 +4,7 @@
 	// =========================================================================
 	// import other modules + define own module
 	// =========================================================================
-	var core = window.odb.core;
-	var module = window.odb.odb = {};
+	var module = window.odb = {};
 
 	// =========================================================================
 	// object database
@@ -36,6 +35,10 @@
 				createObject: options.createObject
 			};
 
+			// deserialize
+			if (options.json) {
+				this.fromJson(options.json);
+			}
 		},
 
 		put: function () {
