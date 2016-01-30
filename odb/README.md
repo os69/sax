@@ -1,8 +1,8 @@
-# ODB: A Javascript Object Datatabase
+# ODB: A Javascript Object Database
 
-## Installation
+## Loading the Library
 
-Load the library :
+When using in the browser load the library by a script tag in HTML:
 ```HTML
 <script src="odb.js" type="text/javascript"></script>
 ```
@@ -31,14 +31,16 @@ Dump the database to JSON:
 ```javascript
 var json = JSON.stringify(db.toJson());
 ```
-Create a new database and fill it with data from JSON
+Create a new database and fill it with data from JSON:
 ```javascript
 db = new odb.DB({
     json: JSON.parse(json)
 });
 ```
 ## Storing Objects with Circular References
-Unlike JSON you can store objects with circular references in the object database. The database assigns ids to the objects. Internally the object database uses the ids for storing object references.
+Unlike JSON you can store objects with circular references in the object database. The database assigns IDs to the objects. Internally the object database uses the IDs for storing object references.
+
+Example for storing objects with circular references:
 ```javascript
 // create empty database
 var db = new odb.DB();
@@ -60,10 +62,138 @@ o3.p = o1;
 // store o1 (and via recursion o2 and o3) in the database
 db.put('o1', o1);
 ```
-## Ids for the Objects 
-The object database generates ids for the objects in the database. Instead of relying on the automatic id generation an object can provide its own id. In the object database constructor you can define the name of an object property which stores the id or the name of a method for getting the id.
 
-### Getting the id from an Property
+## Storing Instances of a Class in the Object Database
+
+### Class Information by Property
+Besides simple objects like ``[1,2,3]`` or ``{a:1, b:2}`` typically you want to store instances of a class (=type) in the object database. In Javascript classes are represented by a constructor function and a prototype.
+
+Here is a simple class definition:
+```javascript
+window.mylib = {};
+
+// constructor function
+window.mylib.Collection = function() {
+    this.init.apply(this, arguments);
+};
+
+// prototype
+window.mylib.Collection.prototype = {
+    type: 'mylib.Collection',
+    init: function() {
+        this.items = [];
+    },
+    add: function(item) {
+        this.items.push(item);
+    }
+};
+```
+The prototype includes the property 'type' which store the name of the type. This is needed for the object database in order to restore objects. By default the object database assumes that the name of the type is a dot separated package path. The database follows the packagage path starting from window and expects to find the constructor function.
+
+The following snippet creates an instance of class 'Collection' and then stores the instance in the database:
+```javascript
+// create an instance of class Collection
+var collection = new window.mylib.Collection();
+collection.add(1);
+collection.add(2);
+
+// create database and store instance
+var db = new odb.DB({
+    typeProperty: 'type'
+});
+db.put('collection', collection);
+```
+When creating the database you can specify which property holds the type information. 
+
+###Type Information via a Getter
+Instead of a property each object could provide the type information via a getter method.
+
+Class definition:
+
+```javascript
+ 
+ window.mylib = {};
+
+// constructor function
+window.mylib.Collection = function() {
+    this.init.apply(this, arguments);
+};
+
+// prototype
+window.mylib.Collection.prototype = {
+    type: 'mylib.Collection',
+    myGetType: function() {
+        return this.type;
+    },
+    init: function() {
+        this.items = [];
+    },
+    add: function(item) {
+        this.items.push(item);
+    }
+};
+```
+Create an instance of the class and store it in the database:
+```javascript
+// create empty database
+var db = new odb.DB({
+    getType: 'myGetType'
+});
+
+var collection = new window.mylib.Collection();
+collection.add(1);
+collection.add(2);
+
+db.put('collection', collection);
+```
+###Custom Object Factory
+
+You can specify an object factory for creation of objects. The factory is called with the type information and returns an new object of the type.
+
+```javascript
+window.mylib = {};
+
+// constructor function
+window.mylib.Collection = function() {
+    this.init.apply(this, arguments);
+};
+
+// prototype
+window.mylib.Collection.prototype = {
+    type: 'collection',
+    init: function() {
+        this.items = [];
+    },
+    add: function(item) {
+        this.items.push(item);
+    }
+};
+
+// create empty database 
+// type information is stored in property type of class definitions (prototype)
+// a custom object factory is used 
+var db = new odb.DB({
+    typeProperty: 'type',
+    createObject: function(type) {
+        switch (type) {
+            case 'collection':
+                return new window.mylib.Collection();
+                break;
+        }
+    }
+});
+
+// store and instance of the object in the database
+var collection = new window.mylib.Collection();
+collection.add(1);
+collection.add(2);
+db.put('collection', collection);
+```
+
+## IDs for the Objects 
+The object database generates IDs for the objects in the database. Instead of relying on the automatic ID generation an object can provide its own ID. In the object database constructor you can define the name of an object property which stores the ID or the name of a method for getting the ID.
+
+### Getting the ID from an Property
 ```javascript
 // create empty database
 // the id of an object is taken from the property 'id'
@@ -108,38 +238,4 @@ db.put(notebook);
 // get object from db
 notebook = db.get('4711');
 ```
-
-## Storing Class Instances in the Object Database
-Besides simple objects like ``[1,2,3]`` or ``{a:1, b:2}`` typically you want to store 'instances of a class' = objects with a prototype hierarchy in the database. Here is a simple class definition:
-```javascript
-window.mylib = {};
-
-window.mylib.Collection = function() {
-    this.init.apply(this, arguments);
-};
-window.mylib.Collection.prototype = {
-    type: 'mylib.Collection',
-    init: function() {
-        this.items = [];
-    },
-    add: function(item) {
-        this.items.push(item);
-    }
-};
-```
-The prototype includes the property 'type'. This is needed for the object database in order to restore objects. The following snippet creates an instance of 'Collection' and stores the instance in the database:
-```javascript
-// create an instance of class Collection
-var collection = new window.mylib.Collection();
-collection.add(1);
-collection.add(2);
-
-// create database and store instance
-var db = new odb.DB({
-    typeProperty: 'type'
-});
-db.put('collection', collection);
-```
-When creating the database you can specify which property holds the type information. Instead of a property each object could provide the type information via a getter. 
-
 
