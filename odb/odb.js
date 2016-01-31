@@ -1,19 +1,11 @@
-/* global window, require, console */
-(function () {
+/* global window, require, console, exports */
+(function (exports) {
 
-	// =========================================================================
-	// import other modules + define own module
-	// =========================================================================
-	var module = window.odb = {};
-
-	// =========================================================================
-	// object database
-	// ========================================================================= 
-	module.DB = function () {
+	exports.DB = function () {
 		this._init.apply(this, arguments);
 	};
 
-	module.DB.prototype = {
+	exports.DB.prototype = {
 
 		_init: function (options) {
 
@@ -337,4 +329,5 @@
 
 	};
 
-})();
+
+})(typeof exports === 'undefined' ? this.odb = {} : exports);
