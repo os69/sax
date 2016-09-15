@@ -1,5 +1,11 @@
 # ODB: A Javascript Object Database
 
+ODB is a simple object database for storing Javascript objects. 
+
+- The database stores the objects in the memory. You can dump the memory to JSON and laterwards restore the database from JSON.
+- Inserting a object into the database also recursively inserts all dependend subobjects. You can control recursion by a check function.
+- The database does not support SQL. Objects are stored with a key and retrieved by a key.
+ 
 ## Loading the Library
 
 When using in the browser load the library by a script tag in HTML:
@@ -192,6 +198,33 @@ collection.add(1);
 collection.add(2);
 db.put('collection', collection);
 ```
+## Controlling the Recursive Insertion Process
+Objects and subobjects are inserted recursively into the database. In case you want to stop the recursion you can use a check function which is called before an object is inserted into the database.
+```javascript
+// create empty database with a check function
+var db = new odb.DB({
+checkInsertion: function (obj, property, value) {
+	if (value.skip) {
+		return false;
+	}
+	return true;
+}
+});
+
+// put an object into the database
+// subobjects are inserted recursively 
+// except q which is skipped because of the checkInsertion function
+db.put('a', {
+p: {
+	x: 1,
+	y: 2
+},
+q: {
+	skip: true,
+	u: 1,
+	v: 2
+}
+```
 
 ## IDs for the Objects 
 The object database generates IDs for the objects in the database. Instead of relying on the automatic ID generation an object can provide its own ID. In the object database constructor you can define the name of an object property which stores the ID or the name of a method for getting the ID.
@@ -258,6 +291,8 @@ var db = new odb.DB(options);
 |getType|name of a method which is used to get the type of an object|
 |typeProperty|name of the property which contains the type of an object|
 |createObject|function for creating an object|
+|checkInsertion|check function for controlling the recursive insertion process|
+
 
 
 

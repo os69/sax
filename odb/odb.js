@@ -24,8 +24,14 @@
 				idProperty: options.idProperty,
 				getType: options.getType,
 				typeProperty: options.typeProperty,
-				createObject: options.createObject
+				createObject: options.createObject,
+				checkInsertion: options.checkInsertion
 			};
+
+			// defaults
+			if (!this.hooks.getType && !this.hooks.typeProperty) {
+				this.hooks.typeProperty = 'type';
+			}
 
 			// deserialize
 			if (options.json) {
@@ -200,6 +206,7 @@
 
 			// update serialized object map
 			var serializedObject = {};
+
 			this.serializedObjectMap[id] = serializedObject;
 
 			// set admin data
@@ -213,6 +220,11 @@
 					continue;
 				}
 				var value = obj[property];
+				if (this.hooks.checkInsertion) {
+					if (!this.hooks.checkInsertion.apply(this, [obj, property, value])) {
+						continue;
+					}
+				}
 				switch (this._getType(value)) {
 				case 'simple':
 					serializedObject[property] = value;

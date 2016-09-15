@@ -211,6 +211,39 @@
 
 	};
 
+	var example8 = function () {
+
+		// create empty database
+		var db = new odb.DB({
+			checkInsertion: function (obj, property, value) {
+				if (value.skip) {
+					return false;
+				}
+				return true;
+			}
+		});
+
+		// put an object into the database
+		// subobjects are inserted recursively 
+		// except q which is skipped because of the checkInsertion function
+		db.put('a', {
+			p: {
+				x: 1,
+				y: 2
+			},
+			q: {
+				skip: true,
+				u: 1,
+				v: 2
+			}
+		});
+
+		db.debugReload();
+
+		var a = db.get('a');
+
+	};
+
 
 	example1();
 	example2();
@@ -219,6 +252,7 @@
 	example5();
 	example6();
 	example7();
+	example8();
 
 
 })();

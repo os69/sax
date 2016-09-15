@@ -259,8 +259,70 @@
 	};
 
 
+	var test3 = function () {
+
+		var db = new odb.DB();
+		var a = {
+			a: [{
+				x: 1
+			}, {
+				x: 2
+			}, {
+				x: 3
+			}]
+		};
+		db.put('a', a);
+		db.debugReload();
+		a = db.get('a');
+		check(a.a[0].x === 1);
+		check(a.a[1].x === 2);
+		check(a.a[2].x === 3);
+		a.a.splice(1, 1);
+		db.debugReload();
+		a = db.get('a');
+		check(a.a[0].x === 1);
+		check(a.a[1].x === 3);
+
+
+	};
+
+	var test4 = function () {
+
+		var db = new odb.DB({
+			checkInsertion: function (obj, property, value) {
+				if (property === 'd') {
+					return false;
+				}
+				return true;
+			}
+		});
+		var a = {
+			a: [{
+				x: 1
+			}, {
+				x: 2
+			}, {
+				x: 3
+			}],
+			b: {
+				c: 1,
+				d: 2
+			}
+		};
+
+		db.put('a', a);
+		db.debugReload();
+		a = db.get('a');
+
+
+
+
+	};
+
 	test1();
 	test2();
+	test3();
+	test4();
 	console.log('finished');
 
 
