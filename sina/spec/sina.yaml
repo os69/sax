@@ -1,0 +1,88 @@
+classes:     
+  - name: Sina
+    methods: 
+        - name: getDataSourcesAsync
+          desc: Returns all datasources.
+          returns:
+            type: list DataSource
+            desc: List of datasources.
+        - name: getDataSourceAsync
+          params:
+            - name: key
+              type: string
+              desc: Key of datasource
+          returns:
+            type: DataSource
+        - name: createSearchQuery
+          params:
+            - name: Soptions
+              type: 
+                name: SearchQueryOptions
+                attributes:
+                    - name: searchTerm
+                      type: string
+                      optional: true
+                    - name: condition
+                      type: Condition
+                      optional: true
+                    - name: dataSource
+                      type: DataSource
+                      optional: true
+                    - name: top
+                      type: integer
+                      default: 10
+                      optional: true
+                    - name: skip
+                      type: integer
+                      default: 0
+                    - name: facets
+                      type : boolean
+                      optional: true
+                      default: false
+        - name: createChartQuery
+          params:
+            - name: options
+              type:
+                name: ChartQueryOptions
+                attributes:
+                    - name: dimensions
+                      type: list string
+                      optional: true
+                    - name: dimension
+                      type: string
+                      optional: true
+                    - name: searchTerm
+                      type: string
+                      optional: true
+                    - name: condition
+                      type: Condition
+                      optional: true
+                    - name: dataSource
+                      type: DataSource
+                      optional: true
+                    - name: top
+                      type: integer
+                      default: 10
+                      optional: true
+                    - name: skip
+                      type: integer
+                      default: 0
+  - name: DataSource
+    properties:
+        - name: label
+          readonly: true
+        - name: labelPlural
+        - name: type
+          type: 
+            name: DataSourceType
+            enumValues:
+             - name: BusinessObject
+             - name: Category
+        - name: key
+    methods:
+        - name: getLabel
+  - name: SearchQuery
+    extends: Query
+    
+        
+
