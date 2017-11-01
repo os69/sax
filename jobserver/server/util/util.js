@@ -1,4 +1,5 @@
 var Duplex = require('stream').Duplex;
+var Promise = require('bluebird');
 
 module.exports = {
 

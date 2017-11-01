@@ -1,3 +1,5 @@
+var Promise = require('bluebird');
+
 var MultiBuffer = function () {
     this.init.apply(this, arguments);
 }

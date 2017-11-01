@@ -1,8 +1,8 @@
+var Promise = require('bluebird');
 var child_process = require('child_process');
-var promisify = require('promisify-node');
 var path = require('path');
-var fs = promisify('fs');
-var rimraf = promisify(require('rimraf'));
+var fs = Promise.promisifyAll(require('fs'));
+var rimraf = Promise.promisify(require('rimraf'));
 var util = require('../util/util');
 
 var Job = function () {
@@ -33,7 +33,7 @@ Job.prototype = {
     setup: function () {
         var createJobsDir;
         if (!fs.existsSync('jobs')) {
-            createJobsDir = fs.mkdir('jobs');
+            createJobsDir = fs.mkdirAsync('jobs');
         } else {
             createJobsDir = Promise.resolve();
         }
@@ -41,7 +41,7 @@ Job.prototype = {
             if (fs.existsSync(this.jobDirPath)) {
                 return;
             } else {
-                return fs.mkdir(this.jobDirPath);
+                return fs.mkdirAsync(this.jobDirPath);
             }
         }.bind(this));
     },

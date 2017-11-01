@@ -1,7 +1,7 @@
-var promisify = require('promisify-node');
+var Promise = require('bluebird');
 var JobBase = require('../jobmiddleware/Job');
 var util = require('../util/util');
-var fs = promisify('fs');
+var fs = Promise.promisifyAll(require('fs'));
 var MultiBuffer = require('../util/MultiBuffer');
 
 var Job = function () {
@@ -24,9 +24,9 @@ Job.prototype = util.extend(Object.create(JobBase.prototype), {
 
     returnResult: function () {
         var multiBuffer = new MultiBuffer();
-        return fs.readFile(this.filePath('test_g.jpg')).then(function (buffer) {
+        return fs.readFileAsync(this.filePath('test_g.jpg')).then(function (buffer) {
             multiBuffer.add(buffer);
-            return fs.readFile(this.filePath('test_i.jpg'));
+            return fs.readFileAsync(this.filePath('test_i.jpg'));
         }.bind(this)).then(function (buffer) {
             multiBuffer.add(buffer);
             var mergedBuffer = multiBuffer.getMergedBuffer();

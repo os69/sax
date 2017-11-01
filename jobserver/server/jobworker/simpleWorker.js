@@ -1,3 +1,4 @@
+var Promise = require('bluebird');
 var JobBase = require('../jobmiddleware/Job');
 var util = require('../util/util');
 

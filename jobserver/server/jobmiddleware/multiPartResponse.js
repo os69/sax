@@ -1,3 +1,4 @@
+var Promise = require('bluebird');
 var child_process = require('child_process');
 var util = require('../util/util');
 var MultiBuffer = require('../util/MultiBuffer');

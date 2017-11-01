@@ -1,4 +1,5 @@
-const child_process = require('child_process');
+var Promise = require('bluebird');
+var child_process = require('child_process');
 
 var sync = function (options) {
 
