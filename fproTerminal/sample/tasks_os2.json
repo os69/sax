@@ -1,0 +1,12 @@
+[
+    {
+        "job": "os2",
+        "id": "os2-task1",
+        "description": "Task 1"
+    },
+    {
+        "job": "os2",
+        "id": "os2-task2",
+        "description": "Task 2"
+    }
+]
