@@ -85,17 +85,17 @@ data PositionStatistic = PositionStatistic Position Integer Integer Integer deri
 
 emptyPositionStatistic = PositionStatistic (Position 0 0) 0 0 0 
 
-calculateStatistic:: Board -> Position -> Direction -> [PositionStatistic]
-calculateStatistic board startPosition direction = go emptyPositionStatistic [] startPosition
-    where go (PositionStatistic _ red blue empty) statistics position 
-                | not (validPosition position) = statistics
-                | otherwise                    = go statistic (statistic:statistics) (move position direction 1)
+calculateStatistic:: Board -> Position -> Direction -> a -> (a->PositionStatistic->a) -> a
+calculateStatistic board startPosition direction startAccu accuFunc = go emptyPositionStatistic startAccu startPosition
+    where go (PositionStatistic _ red blue empty) accu position 
+                | not (validPosition position) = accu
+                | otherwise                    = go statistic (accuFunc accu statistic) (move position direction 1)
                   where maybePlayer         = get board position
                         maybePlayerMinus4   = get board (move position direction (-4))
-                        statistic           = (PositionStatistic position 
+                        statistic           = PositionStatistic position 
                                                (red  + count Red   maybePlayer   - count Red   maybePlayerMinus4)
                                                (blue + count Blue  maybePlayer   - count Blue  maybePlayerMinus4)
-                                               (empty+ count Empty maybePlayer   - count Empty maybePlayerMinus4))
+                                               (empty+ count Empty maybePlayer   - count Empty maybePlayerMinus4)
                         count player1 Nothing = 0
                         count player1 (Just player2) 
                             | player1==player2    = 1
@@ -118,9 +118,14 @@ score (red,blue,empty) player = _score own empty
             | own==3 = 3
             | own==4 = 1000
 
-totalScore board =
-  map calcScore (calculateStatistic board startPosition direction)
-  where calcScore startPosition direction = foldl 
+
+redScore red blue empty = score (red, blue, empty) Red - score (red, blue, empty) Blue
+
+positionAndDirectionScore board (startPosition, direction) = 
+    calculateStatistic board startPosition direction 0 (\value (PositionStatistic _ red blue empty) -> value+redScore red blue empty)
+
+totalScore board =  sum (map (positionAndDirectionScore board) positionsAndDirections)
+              
 
 -- calculate list of start positions and directions
 positionsAndDirections = horizontalPositionsAndDirections ++ 
@@ -128,20 +133,22 @@ positionsAndDirections = horizontalPositionsAndDirections ++
                          leftTopToRightBottomPositionsAndDirections ++
                          rightTopToLeftBottomPositionsAndDirections
 
-horizontalPositionsAndDirections = [((Position 1 row),(Direction 1 0))|row <-[1..numberRows]]
-verticalPositionsAndDirections =  [((Position column 1),(Direction 0 1))|column <-[1..numberColumns]]
+horizontalPositionsAndDirections = [(Position 1 row,Direction 1 0)|row <-[1..numberRows]]
+verticalPositionsAndDirections =  [(Position column 1,Direction 0 1)|column <-[1..numberColumns]]
 
-leftTopToRightBottomPositionsAndDirections = [((Position 1 row),(Direction 1 1))|row <-[1..numberRows]] ++
-                                             [((Position column 1),(Direction 1 1))| column <- [2..numberColumns]]
+leftTopToRightBottomPositionsAndDirections = [(Position 1 row, Direction 1 1)|row <-[1..numberRows]] ++
+                                             [(Position column 1, Direction 1 1)| column <- [2..numberColumns]]
 
-rightTopToLeftBottomPositionsAndDirections = [((Position numberColumns row),(Direction (-1) 1))|row <-[1..numberRows]] ++
-                                             [((Position column 1),(Direction (-1) 1))|column <-[(numberColumns-1),(numberColumns-2)..1]]
+rightTopToLeftBottomPositionsAndDirections = [(Position numberColumns row, Direction (-1) 1)|row <-[1..numberRows]] ++
+                                             [(Position column 1, Direction (-1) 1)|column <-[(numberColumns-1),(numberColumns-2)..1]]
+                                             
 -- main
 main = do
     let board = emptyBoard `set` (Position 2 3,Red)
     print board
-    let statistic = calculateStatistic board (Position 1 3) (Direction 1 0)    
-    print statistic
+    let statistic = calculateStatistic board (Position 1 3) (Direction 1 0) [] (flip (:))   
+    putStrLn (intercalate "\n" (map show statistic))
+    print (totalScore board)
 
     --print "====="
     --print horizontalPositionsAndDirections
