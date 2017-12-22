@@ -79,6 +79,21 @@ invertDirection (Direction deltaColumn deltaRow) = Direction (-deltaColumn) (-de
 
 move (Position column row) (Direction deltaColumn deltaRow) steps = Position (column+steps*deltaColumn) (row+steps*deltaRow)
 
+-- calculate list of start positions and directions
+positionsAndDirections = horizontalPositionsAndDirections ++ 
+                         verticalPositionsAndDirections ++
+                         leftTopToRightBottomPositionsAndDirections ++
+                         rightTopToLeftBottomPositionsAndDirections
+
+horizontalPositionsAndDirections = [(Position 1 row,Direction 1 0)|row <-[1..numberRows]]
+verticalPositionsAndDirections =  [(Position column 1,Direction 0 1)|column <-[1..numberColumns]]
+
+leftTopToRightBottomPositionsAndDirections = [(Position 1 row, Direction 1 1)|row <-[1..numberRows]] ++
+                                             [(Position column 1, Direction 1 1)| column <- [2..numberColumns]]
+
+rightTopToLeftBottomPositionsAndDirections = [(Position numberColumns row, Direction (-1) 1)|row <-[1..numberRows]] ++
+                                             [(Position column 1, Direction (-1) 1)|column <-[(numberColumns-1),(numberColumns-2)..1]]
+
 -- statistic
 
 data PositionStatistic = PositionStatistic Position Integer Integer Integer deriving Show
@@ -118,30 +133,23 @@ score (red,blue,empty) player = _score own empty
             | own==3 = 3
             | own==4 = 1000
 
-
-redScore red blue empty = score (red, blue, empty) Red - score (red, blue, empty) Blue
-
-positionAndDirectionScore board (startPosition, direction) = 
-    calculateStatistic board startPosition direction 0 (\value (PositionStatistic _ red blue empty) -> value+redScore red blue empty)
+positionAndDirectionScore board (startPosition, direction) = calculateStatistic board startPosition direction 0 scoreAccu
+    where 
+      scoreAccu value (PositionStatistic _ red blue empty) = value+redScore red blue empty
+      redScore red blue empty = score (red, blue, empty) Red - score (red, blue, empty) Blue
 
 totalScore board =  sum (map (positionAndDirectionScore board) positionsAndDirections)
-              
 
--- calculate list of start positions and directions
-positionsAndDirections = horizontalPositionsAndDirections ++ 
-                         verticalPositionsAndDirections ++
-                         leftTopToRightBottomPositionsAndDirections ++
-                         rightTopToLeftBottomPositionsAndDirections
+-- test score                                                          
 
-horizontalPositionsAndDirections = [(Position 1 row,Direction 1 0)|row <-[1..numberRows]]
-verticalPositionsAndDirections =  [(Position column 1,Direction 0 1)|column <-[1..numberColumns]]
+testScores =
+    do
+        test emptyBoard 1
+    where test board expected 
+            | score == expected = Right "Ok"
+            | otherwise         = Left ("Error "++show score)
+            where score = totalScore board
 
-leftTopToRightBottomPositionsAndDirections = [(Position 1 row, Direction 1 1)|row <-[1..numberRows]] ++
-                                             [(Position column 1, Direction 1 1)| column <- [2..numberColumns]]
-
-rightTopToLeftBottomPositionsAndDirections = [(Position numberColumns row, Direction (-1) 1)|row <-[1..numberRows]] ++
-                                             [(Position column 1, Direction (-1) 1)|column <-[(numberColumns-1),(numberColumns-2)..1]]
-                                             
 -- main
 main = do
     let board = emptyBoard `set` (Position 2 3,Red)
@@ -149,7 +157,8 @@ main = do
     let statistic = calculateStatistic board (Position 1 3) (Direction 1 0) [] (flip (:))   
     putStrLn (intercalate "\n" (map show statistic))
     print (totalScore board)
-
+    print testScores
+   
     --print "====="
     --print horizontalPositionsAndDirections
     --print "====="
