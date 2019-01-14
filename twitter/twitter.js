@@ -11,20 +11,32 @@
         return obj1;
     };
 
-    var firstIndexOf = function (text, index, characters, invert) {
-        for (var i = index; i < text.length; ++i) {
-            var char = text[i];
-            if (invert) {
-                if (characters.indexOf(char) < 0) {
-                    return i;
-                }
-            } else {
-                if (characters.indexOf(char) >= 0) {
-                    return i;
-                }
-            }
-        }
-        return text.length;
+    var decode1 = function (text) {
+        var entities = [
+            ['amp', '&'],
+            ['apos', '\''],
+            ['#x27', '\''],
+            ['#x2F', '/'],
+            ['#39', '\''],
+            ['#47', '/'],
+            ['lt', '<'],
+            ['gt', '>'],
+            ['nbsp', ' '],
+            ['quot', '"']
+        ];
+        for (var i = 0, max = entities.length; i < max; ++i)
+            text = text.replace(new RegExp('&' + entities[i][0] + ';', 'g'), entities[i][1]);
+        return text;
+    }
+
+    var decode2 = function (str) {
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
+        });
+    };
+
+    var decode = function (text) {
+        return decode2(decode1(text));
     };
 
     module.Token = function () { };
@@ -32,14 +44,13 @@
         init: function (text, index) {
             this.text = text;
             this.startIndex = index;
-            for (this.endIndex = index; this.endIndex < text.length; ++this.endIndex) {
-                if (!this.regExp.test(text[this.endIndex])) {
-                    return;
-                }
-            }
+            this.regExp.lastIndex = this.startIndex;
+            var match = this.regExp.exec(text);
+            this.endIndex = this.startIndex + match[0].length;
         },
         match: function (text, index) {
-            return this.regExp.test(text[index]);
+            this.regExp.lastIndex = 0;
+            return !!this.regExp.exec(text[index]);
         },
         getLength: function () {
             return this.endIndex - this.startIndex;
@@ -51,20 +62,25 @@
 
     module.TextToken = function () { this.init.apply(this, arguments) };
     module.TextToken.prototype = extend(new module.Token(), {
-        regExp: new RegExp('[^@\\s]')
+        regExp: new RegExp('[^#@\\s]+', 'g')
     });
 
     module.UserToken = function () { this.init.apply(this, arguments) };
     module.UserToken.prototype = extend(new module.Token(), {
-        regExp: new RegExp('[@]')
+        regExp: new RegExp('[@]+', 'g')
+    });
+
+    module.HashToken = function () { this.init.apply(this, arguments) };
+    module.HashToken.prototype = extend(new module.Token(), {
+        regExp: new RegExp('[#]+', 'g')
     });
 
     module.WhitespaceToken = function () { this.init.apply(this, arguments); }
     module.WhitespaceToken.prototype = extend(new module.Token(), {
-        regExp: new RegExp('\\s')
+        regExp: new RegExp('\\s+', 'g')
     });
 
-    var tokenClasses = [module.WhitespaceToken, module.UserToken, module.TextToken];
+    var tokenClasses = [module.WhitespaceToken, module.HashToken, module.UserToken, module.TextToken];
 
     module.Tokenizer = function () { this.init.apply(this, arguments); }
     module.Tokenizer.prototype = {
@@ -91,7 +107,7 @@
             for (var i = 0; i < tokenClasses.length; ++i) {
                 var tokenClass = tokenClasses[i];
                 if (tokenClass.prototype.match(this.text, this.index)) {
-                    var token = new tokenClass(this.text, this.index);
+                    var token = new tokenClass(this.text, this.index, );
                     this.index += token.getLength();
                     return token;
                 }
@@ -120,6 +136,7 @@
     };
     module.TwitterDocument.prototype = {
         init: function (text) {
+            text = decode(text);
             this.nodes = [];
             this.parse(text);
         },
@@ -135,16 +152,30 @@
                     node = new module.TwitterTextNode();
                 }
                 if (token instanceof module.TextToken) {
-                    node = new module.TwitterTextNode();
+                    var text = token.toString();
+                    if (text.indexOf('http://') === 0 || text.indexOf('https://') === 0) {
+                        node = new module.TwitterLinkNode();
+                    } else {
+                        node = new module.TwitterTextNode();
+                    }
                 }
                 if (token instanceof module.UserToken) {
                     node = new module.TwitterUserNode();
+                }
+                if (token instanceof module.HashToken) {
+                    node = new module.TwitterHashNode();
                 }
                 if (!node) {
                     throw 'parse error ' + token.toString();
                 }
                 node.parse(tokenizer);
                 this.nodes.push(node);
+            }
+        },
+        render: function (parentNode) {
+            for (var i = 0; i < this.nodes.length; ++i) {
+                var node = this.nodes[i];
+                node.render(parentNode);
             }
         }
     };
@@ -153,6 +184,9 @@
     module.TwitterTextNode.prototype = {
         parse: function (tokenizer) {
             this.text = tokenizer.getNextToken().toString();
+        },
+        render: function (parentNode) {
+            parentNode.appendChild(document.createTextNode(this.text));
         }
     }
 
@@ -161,9 +195,38 @@
         parse: function (tokenizer) {
             tokenizer.getNextToken(); // consume @-token
             this.user = tokenizer.getNextToken().toString();
+        },
+        render: function (parentNode) {
+            parentNode.appendChild(document.createTextNode('@'+this.user));
         }
     }
 
-    var twitterDocument = new module.TwitterDocument('Hello World @sap');
+    module.TwitterHashNode = function () { }
+    module.TwitterHashNode.prototype = {
+        parse: function (tokenizer) {
+            tokenizer.getNextToken(); // consume #-token
+            this.hashTag = tokenizer.getNextToken().toString();
+        },
+        render: function (parentNode) {
+            parentNode.appendChild(document.createTextNode('#'+this.hashTag));
+        }
+    }
+
+    module.TwitterLinkNode = function () { }
+    module.TwitterLinkNode.prototype = {
+        parse: function (tokenizer) {
+            this.url = tokenizer.getNextToken().toString();
+        },
+        render: function (parentNode) {
+            parentNode.appendChild(document.createTextNode(this.url));
+        }
+    }
+
+    module.renderTweet = function(tweet){
+        var twitterDocument = new module.TwitterDocument(tweet);
+        twitterDocument.render(document.body);    
+    }
+
+    module.renderTweet('text #tag @user &gt; http://test.com');
 
 })();
