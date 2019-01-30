@@ -18,10 +18,11 @@ define(['./core'], function (core) {
 	// directed link which connects two nodes
 	// =========================================================================	
 	var Link = core.defineClass({
-		init: function (sourceNode, targetNode) {
+		init: function (sourceNode, targetNode, description) {
 			this.source = sourceNode;
 			this.target = targetNode;
 			this.id = sourceNode.id + '_' + targetNode.id;
+			this.description = description || '';
 		}
 	});
 
@@ -47,8 +48,8 @@ define(['./core'], function (core) {
 		getNode: function (id) {
 			return this.nodesMap[id];
 		},
-		createLink: function (sourceNode, targetNode) {
-			var link = new Link(sourceNode, targetNode);
+		createLink: function (sourceNode, targetNode, linkDescription) {
+			var link = new Link(sourceNode, targetNode, linkDescription);
 			this.links.push(link);
 			return link;
 		}
@@ -67,12 +68,12 @@ define(['./core'], function (core) {
 			var graphLinks = [];
 			for (var i = 0; i < this.graph.links.length; ++i) {
 				var link = this.graph.links[i];
-				graphLinks.push(link.source.id + '->' + link.target.id);
+				graphLinks.push(link.source.id + '->' + link.target.id + ' [label="' + link.description + '"]');
 			}
 			var graphNodes = [];
 			for (var j = 0; j < this.graph.nodes.length; ++j) {
 				var node = this.graph.nodes[j];
-				graphNodes.push(node.id + ' [label="' + node.id + ' ' + node.description + '"]');
+				graphNodes.push(node.id + ' [shape=box, label="' + node.description + '"]');
 			}
 			var graph = 'digraph G{\n' + graphLinks.join('\n') + '\n' + graphNodes.join('\n') + '\n}';
 			var result = Viz(graph, 'svg', 'dot');

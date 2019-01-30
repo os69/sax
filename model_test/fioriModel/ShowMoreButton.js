@@ -2,18 +2,20 @@ define(['../core/core', '../testEngine/Model', '../testEngine/Action'], function
 
     return Model.derive({
         meta: {
-            name: 'SearchButton'
+            name: 'ShowMoreButton'
         },
         init: function () {
             Model.prototype.init.apply(this, arguments);
         },
         click: function () {
-            this.parent.clickMagnifier();
+            this.parent.parent.parent.clickShowMoreButton();
+        },
+        _hash: function () {
+            return 'smb';
         },
         _getActions: function () {
-            return [new Action({ title: 'click magnifier', execute: () => this.click() })];
-        },
-        _hash: function () { return 'sb'; },
+            return [new Action({ title: 'click show more', execute: () => this.click() })];
+        }
     });
 
 

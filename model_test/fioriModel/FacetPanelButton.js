@@ -2,18 +2,20 @@ define(['../core/core', '../testEngine/Model', '../testEngine/Action'], function
 
     return Model.derive({
         meta: {
-            name: 'SearchButton'
+            name: 'FacetPanelButton'
         },
         init: function () {
             Model.prototype.init.apply(this, arguments);
         },
         click: function () {
-            this.parent.clickMagnifier();
+            this.parent.clickFacetPanelButton();
+        },
+        _hash: function () {
+            return 'fpb';
         },
         _getActions: function () {
-            return [new Action({ title: 'click magnifier', execute: () => this.click() })];
-        },
-        _hash: function () { return 'sb'; },
+            return [new Action({ title: 'click facetpanel', execute: () => this.click() })];
+        }
     });
 
 

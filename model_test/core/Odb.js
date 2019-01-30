@@ -74,6 +74,9 @@ define(['./core'], function (core) {
         cloneFunction: function (func) { return func; },
         cloneSimple: function (obj) { return obj; },
         cloneObject: function (obj) {
+            if (obj === null) {
+                return null;
+            }
             if (obj.meta && typeof obj.meta.clone !== 'undefined' && !obj.meta.clone) {
                 return obj;
             }

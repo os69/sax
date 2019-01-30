@@ -2,11 +2,16 @@ define(['../core/core'], function (core) {
 
     return core.defineClass({
         init: function (properties) {
-            this.hash =  properties.hash;
-            this.successorStates = [];
+            this.id = properties.id;
+            this.hash = properties.hash;
+            this.actions = [];
         },
-        addSuccessorState: function (state) {
-            this.successorStates.push(state);
+        addAction: function (properties) {
+            this.actions.push({
+                id: properties.id,
+                description: properties.description,
+                targetState: properties.targetState
+            });
         }
     });
 

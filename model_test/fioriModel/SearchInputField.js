@@ -9,26 +9,30 @@ define(['../core/core', '../testEngine/Model', '../testEngine/Action'], function
             this.visible = false;
             this.searchTerm = '';
         },
-        hash: function () {
-            return 'SearchInputField:' + this.visible + ':' + this.searchTerm;
-        },
         toggle: function () {
             this.visible = !this.visible;
         },
         setSearchTerm: function (searchTerm) {
             this.searchTerm = searchTerm;
         },
-        getActions: function () {
-            return [];
-            /*if (this.visible) {
+        _hash: function () {
+            return 'sf:' + this.searchTerm;
+        },
+        _getActions: function () {
+            if (!this.searchTerm) {
                 return [
                     new Action({
                         title: 'enter searchterm sally',
                         execute: () => this.setSearchTerm('sally')
                     })];
             } else {
-                return [];
-            }*/
+                return [
+                 /*  new Action({
+                        title: 'clear searchterm',
+                        execute: () => this.setSearchTerm('')
+                    })*/
+                ];
+            }
         }
     });
 
