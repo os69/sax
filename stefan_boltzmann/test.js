@@ -56,7 +56,7 @@ define(['./core/core'], function (core) {
         var n = totalEnergy / deltaEnergy;
         var result = [];
         for (var i = 0; i <= n; ++i) {
-            var w = Math.exp(-i*deltaEnergy/meanEnergy);
+            var w =Math.sqrt(i*deltaEnergy)* Math.exp(-i*deltaEnergy/meanEnergy);
             result.push({ x: i, y: w });
         }
         return result;

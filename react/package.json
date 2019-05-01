@@ -15,6 +15,7 @@
     "@babel/preset-react": "^7.0.0"
   },
   "dependencies": {
+    "react-redux": "^7.0.2",
     "redux": "^4.0.1"
   }
 }
