@@ -38,3 +38,13 @@ const reactElement =
 *Babel* transpiles this to nested *createElements* instruction which create a nested tree structure.
 
 
+componentes
+pure
+state
+presentational
+class, functional
+higher order 
+hooks
+
+
+

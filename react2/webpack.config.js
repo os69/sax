@@ -2,14 +2,16 @@ const path = require("path");
 
 module.exports = {
     entry: {
-        '01_elements' : './src/01_elements/main.js',
-        'app1': './src/app1/main.js',
+        '01' : './src/01_jsx_and_react_elements/main.js',
+        '02': './src/02_react_components/main.js',
+        '03': './src/03_raw_redux/main.js',
         'app2': './src/app2/main.js'
     },
     mode: "development",
     output: {
         filename: "[id].js"
     },
+    devtool: 'source-map',
     devServer: {
         contentBase: path.join(__dirname, "dist"),
         compress: true,
