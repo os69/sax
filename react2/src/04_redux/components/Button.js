@@ -1,6 +1,6 @@
 import React from "react";
 
-export default class Button extends React.Component {
+export default class Button extends React.PureComponent {
     constructor(props) {
         super(props);
         this.onClick = this.onClick.bind(this);
@@ -8,9 +8,6 @@ export default class Button extends React.Component {
     onClick() {
         this.props.onClick();
     }
-   /* shouldComponentUpdate(nextProps, nextState) {
-        return this.props.data != nextProps.data;
-    }    */
     render() {
         return <button onClick={this.onClick}>{this.props.label}</button>
     }

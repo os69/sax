@@ -5,6 +5,7 @@ module.exports = {
         '01' : './src/01_jsx_and_react_elements/main.js',
         '02': './src/02_react_components/main.js',
         '03': './src/03_raw_redux/main.js',
+        '04': './src/04_redux/main.js',
         'app2': './src/app2/main.js'
     },
     mode: "development",

@@ -105,7 +105,7 @@ class SalesOrderItem extends React.Component {
 }
 class FormattedNumber extends React.Component {
    /* shouldComponentUpdate(nextProps, nextState) {
-        return this.props === nextProps && this.state === nextState;
+        
     }*/
     render() {
         console.log('render formatted number', this.props.number);

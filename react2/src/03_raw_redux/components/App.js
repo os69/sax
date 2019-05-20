@@ -3,12 +3,16 @@ import Item from "./Item";
 import TotalCount from "./TotalCount"
 import store from '../store';
 
-export default class App extends React.PureComponent {
+export default class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = props.data;
         store.register(this);
+        window.appComponent = this;
     }
+    /*shouldComponentUpdate(nextProps, nextState) {
+        return this.state != nextState;
+    }*/
     render() {
         console.log('root');
         return <div>

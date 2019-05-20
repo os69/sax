@@ -1,12 +1,6 @@
 import React from "react";
 
-export default class TotalCount extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-   /* shouldComponentUpdate(nextProps, nextState) {
-        return this.props.data != nextProps.data;
-    }*/
+export default class TotalCount extends React.PureComponent {
     render() {
         console.log('render total count');
         let count = 0;

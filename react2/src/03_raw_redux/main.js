@@ -1,8 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom";
-
 import App from "./components/App";
+import appReducer from './reducers/app';
+import { increment } from './actions/actions';
+import store from './store';
 
+// ===========================================================================
+// data model
+// ===========================================================================
 const data = {
     id: 'root',
     label: 'Root',
@@ -43,16 +48,61 @@ const data = {
 
 }
 
-const container = document.createElement('div');
-document.body.appendChild(container);
-ReactDOM.render(<App data={data}/>, container);
 
-import appReducer from './reducers/app';
-import { increment } from './actions/actions';
+// ===========================================================================
+// bad example: state change calls render method of all sub components
+// ===========================================================================
 
-import store from './store';
+function test1() {
 
-store.init(appReducer, data);
-//const changedState = appReducer(data, increment('2', '2-1'));
-//console.log(changedState);
+    // create container
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    // initial rendering
+    ReactDOM.render(<App data={data} />, container);
+
+    // change data and rerender
+    data.items[1].subItems[0].count = 2;
+    window.appComponent.setState(data);;
+}
+
+// ===========================================================================
+// example for state change using immutable model
+// ===========================================================================
+
+function test2() {
+    console.log(data);
+    const incrementEvent = increment('2', '2-1');
+    const changedData = appReducer(data, incrementEvent);
+    console.log(changedData);
+}
+
+// ===========================================================================
+// state change using immutable model + ui update
+// ===========================================================================
+
+function test3() {
+
+    // create container
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    // init store
+    store.init(appReducer, data);
+
+    // initial rendering
+    ReactDOM.render(<App data={data} />, container);
+
+    // change data and rerender
+    const incrementEvent = increment('2', '2-1');
+    store.dispatch(incrementEvent);
+
+    // - use pure component
+    // - increment button
+}
+
+test3();
+
+
 

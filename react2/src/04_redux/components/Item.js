@@ -1,13 +1,7 @@
 import React from "react";
 import SubItem from "./SubItem";
 
-export default class Item extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-   /* shouldComponentUpdate(nextProps, nextState) {
-        return this.props.data != nextProps.data;
-    }*/
+export default class Item extends React.PureComponent {
     render() {
         console.log(this.props.data.label);
         return <li>
