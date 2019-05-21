@@ -1,7 +1,7 @@
 import React from "react";
+import { connect } from 'react-redux';
 import Item from "./Item";
 import TotalCount from "./TotalCount"
-import { connect } from 'react-redux';
 
 export default class App extends React.PureComponent {
     render() {

@@ -1,8 +1,7 @@
 import React from "react";
+import { connect } from 'react-redux';
 import Button from "./Button";
 import { increment } from "../actions/actions";
-import { connect } from 'react-redux';
-import item from "../reducers/item";
 
 export default class SubItem extends React.PureComponent {
     render() {
