@@ -1,10 +1,17 @@
 import React, { FunctionComponent } from 'react';
-import Container from '../model/Container';
+import ContainerModel from '../model/Container';
+import Container from './Container';
+import { connect } from 'react-redux';
 
 const App: FunctionComponent<{
-  container: Container;
+  container: ContainerModel
 }> = (props) => {
-  return <h1>1</h1>;
+  console.log('app', props.container.label);
+  return <Container container={props.container} />;
 };
 
-export default App;
+const mapStateToProps = function (state) {
+  return { container: state };
+}
+
+export default connect(mapStateToProps)(App);

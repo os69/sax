@@ -2,8 +2,13 @@ import * as React from 'react';
 import { render } from 'react-dom';
 import App from './components/App';
 import Container from './model/Container';
+import { createStore } from 'redux';
+import appReducer from './reducers/appReducer';
+import { Provider } from "react-redux";
+import { increment } from './actions/actions';
+import { Action } from './actions/actions';
 
-const container:Container = {
+const container: Container = {
     id: 'root',
     label: 'Root',
     items: [
@@ -42,6 +47,14 @@ const container:Container = {
     ]
 }
 
+const store = createStore<Container,Action,any,any>(appReducer, container);
+
 const node = document.createElement('div');
 document.body.appendChild(node);
-render(<App container={container} />, node);
+render(<Provider store={store}>
+    <App />
+</Provider>, node);
+
+console.log('change');
+store.dispatch(increment('2', '2-1'));
+
