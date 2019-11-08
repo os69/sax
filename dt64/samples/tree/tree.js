@@ -37,7 +37,7 @@ define(['../../main', './TreeNode'], function (tt, TreeNode) {
                     var sourceTreeNode = sourceNode.__node.data;
                     treeNode.appendChildNode(sourceTreeNode);
                 },
-                children: [this.createTitleNode()]
+                children: [this.createTitleNode()]             
             });
         },
 
@@ -47,7 +47,7 @@ define(['../../main', './TreeNode'], function (tt, TreeNode) {
                 children: [
                     tt.createNode({
                         type: 'span',
-                        text: { obj: this.treeNode, propertyName: 'label' },
+                        text: function () { return this.treeNode.getLabel(); }.bind(this),
                         click: this.expand.bind(this)
                     }),
                     tt.createNode({
@@ -56,7 +56,7 @@ define(['../../main', './TreeNode'], function (tt, TreeNode) {
                     }),
                     tt.createNode({
                         type: 'span',
-                        text: { obj: this.treeNode.childNodes, propertyName: 'length' }
+                        text: function () { return this.treeNode.childNodes.getLength(); }.bind(this)
                     })]
             })
         },

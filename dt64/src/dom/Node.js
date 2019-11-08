@@ -25,12 +25,6 @@ define(['../core/core', '../core/event', '../tt/property/mainProperty', '../tt/l
                     case 'data':
                         this.data = propertyValue;
                         break;
-                    case 'css':
-                        this.setupCss(params.css);
-                        break;
-                    case 'children':
-                        this.setupChildren(params.children);
-                        break;
                     case 'click':
                     case 'change':
                     case 'dragstart':
@@ -59,22 +53,21 @@ define(['../core/core', '../core/event', '../tt/property/mainProperty', '../tt/l
                 return;
             }
 
+            this.generateSetter(name);
+
             switch (core.getType(value)) {
-                case 'object':
-                    var sourceObj = value.obj;
-                    var sourcePropertyName = value.propertyName;
-                    event.addEventHandler(sourceObj, util.methodName('set', sourcePropertyName), this, function (signal, value) {
-                        this.setAttribute(name, value);
-                    }.bind(this));
-                    PropertyCollector.stopNotify(); // Node attribute is like a calculated property which depends only on sourcePropertyName -> stop raise get property events
-                    var value = property.getProperty(sourceObj, sourcePropertyName);
-                    PropertyCollector.startNotify(); // restart raising get property events
-                    this.setAttribute(name, value);
-                    break;
                 case 'function':
+                    // generate setter
+                    var calc = value;
+                    // create calculated attribute
+                    property.createCalculatedProperty(this, name, calc);
+                    // subscribe
+                    event.addEventHandler(this, util.methodName('set', name), this, this.dummy);
                     break;
                 case 'simple':
-                    this.setAttribute(name, value);
+                    // call setter
+                    var methodName = util.methodName('set', name);
+                    this[methodName].apply(this, [value]);
                     break;
                 default:
                     throw 'illegal argument';
@@ -82,7 +75,21 @@ define(['../core/core', '../core/event', '../tt/property/mainProperty', '../tt/l
 
         },
 
-        setAttribute: function (name, value) {
+        generateSetter: function (name) {
+            var methodName = util.methodName('set', name);
+            if (this[methodName]) {
+                return;
+            }
+            this[methodName] = function (value) {
+                this.setDomAttribute(name, value);
+            }
+        },
+
+        dummy: function () {
+
+        },
+
+        setDomAttribute: function (name, value) {
             if (name === 'text') {
                 this.domNode.innerText = value;
                 return;
@@ -94,26 +101,35 @@ define(['../core/core', '../core/event', '../tt/property/mainProperty', '../tt/l
             this.domNode.addEventListener(event, handler);
         },
 
-        setupChildren: function (children) {
+        setChildren: function (children) {
+            if (this.children) {
+                event.removeEventHandler(this.children, 'splice', this, this.spliceChildren);
+            }
             this.children = children;
             list.initList(this.children);
             this.initChildren = true;
             event.addEventHandler(this.children, 'splice', this, this.spliceChildren);
             this.initChildren = false;
-            var i;
-            for (i = 0; i < this.children.length; ++i) {
+            while (this.domNode.firstChild) {
+                this.domNode.removeChild(this.domNode.firstChild);
+            }
+            for (var i = 0; i < this.children.length; ++i) {
                 var child = this.children[i];
                 this.domNode.appendChild(child.getDomNode());
             }
         },
 
-        setupCss: function (css) {
+        setCss: function (css) {
+            if (this.css) {
+                event.removeEventHandler(this.css, 'splice', this, this.spliceCss);
+            }
             this.css = css;
             this.internalCss = this.css.slice();
             list.initList(this.css);
             this.initCss = true;
             event.addEventHandler(this.css, 'splice', this, this.spliceCss);
             this.initCss = false;
+            this.domNode.className = '';
             for (i = 0; i < this.css.length; ++i) {
                 var cssClass = this.css[i];
                 this.domNode.classList.add(cssClass);
