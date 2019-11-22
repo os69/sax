@@ -1,0 +1,25 @@
+.tree-display-none {
+    display: none;
+}
+
+.tree-node {
+  padding-left: 2rem;
+}
+
+.tree-node-header{
+    display: flex;
+    flex-direction: row;
+}
+
+.tree-node-header-expander {
+
+}
+
+.tree-node-header-label {
+    flex-grow: 1;
+}
+
+.tree-node-children {
+    
+}
+

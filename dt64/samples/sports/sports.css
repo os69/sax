@@ -1,0 +1,43 @@
+.name-input{
+    background-color: inherit;
+    border-style: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color:inherit;    
+    flex-grow: 1;
+}
+
+.item-name-input{
+    background-color: inherit;
+    border-style: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color:inherit;    
+    flex-grow: 1;
+
+    
+}
+
+.item-count-input{
+    background-color: inherit;
+    border-style: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color:inherit;    
+    width: 3rem;
+  
+}
+
+.item-exercise-name{
+    padding-left: 1rem;
+    padding-right: 1rem;
+    
+}
+
+.tree-node-header-label{
+    display: flex;
+    flex-direction: row;
+}

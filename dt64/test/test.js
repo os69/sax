@@ -1,4 +1,4 @@
-define(['../main', '../src/core/core', './Tester', '../src/core/event'], function (tt, core, Tester, event, dom) {
+define(['../src/index', './Tester'], function (tt, Tester) {
 
     var testCases = {};
 
@@ -22,30 +22,30 @@ define(['../main', '../src/core/core', './Tester', '../src/core/event'], functio
             }
         };
 
-        event.addEventHandler(a, 'hello', b, b.handler);
+        tt.event.addEventHandler(a, 'hello', b, b.handler);
         ctx.assertEquals(count, 0, 'call check');
-        event.raiseEvent(a, 'hello', 13);
+        tt.event.raiseEvent(a, 'hello', 13);
         ctx.assertEquals(count, 1, 'call check');
 
-        ctx.assert(core.isEmpty(a.__event__.sendersMap), 'a senders empty');
-        ctx.assert(!core.isEmpty(a.__event__.receiversMap), 'a receivers not empty');
-        ctx.assert(!core.isEmpty(a.__event__.receiverObjectManager.objMap), 'a receiver object manager is not empty');
-        ctx.assert(core.isEmpty(a.__event__.senderObjectManager.objMap), 'a sender object manager is empty');
-        ctx.assert(!core.isEmpty(b.__event__.sendersMap), 'b senders not empty');
-        ctx.assert(core.isEmpty(b.__event__.receiversMap), 'b receivers empty');
-        ctx.assert(core.isEmpty(b.__event__.receiverObjectManager.objMap), 'b receiver object manager is empty');
-        ctx.assert(!core.isEmpty(b.__event__.senderObjectManager.objMap), 'b sender object manager is not empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).sendersMap), 'a senders empty');
+        ctx.assert(!tt.core.isEmpty(tt.event.getEventData(a).receiversMap), 'a receivers not empty');
+        ctx.assert(!tt.core.isEmpty(tt.event.getEventData(a).receiverObjectManager.objMap), 'a receiver object manager is not empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).senderObjectManager.objMap), 'a sender object manager is empty');
+        ctx.assert(!tt.core.isEmpty(tt.event.getEventData(b).sendersMap), 'b senders not empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).receiversMap), 'b receivers empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).receiverObjectManager.objMap), 'b receiver object manager is empty');
+        ctx.assert(!tt.core.isEmpty(tt.event.getEventData(b).senderObjectManager.objMap), 'b sender object manager is not empty');
 
-        event.delete(a);
+        tt.event.delete(a);
 
-        ctx.assert(core.isEmpty(a.__event__.sendersMap), 'a senders empty');
-        ctx.assert(core.isEmpty(a.__event__.receiversMap), 'a receivers empty');
-        ctx.assert(core.isEmpty(a.__event__.receiverObjectManager.objMap), 'a receiver object manager is empty');
-        ctx.assert(core.isEmpty(a.__event__.senderObjectManager.objMap), 'a sender object manager is empty');
-        ctx.assert(core.isEmpty(b.__event__.sendersMap), 'b senders empty');
-        ctx.assert(core.isEmpty(b.__event__.receiversMap), 'b receivers empty');
-        ctx.assert(core.isEmpty(b.__event__.receiverObjectManager.objMap), 'b receiver object manager is empty');
-        ctx.assert(core.isEmpty(b.__event__.senderObjectManager.objMap), 'b sender object manager is empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).sendersMap), 'a senders empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).receiversMap), 'a receivers empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).receiverObjectManager.objMap), 'a receiver object manager is empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).senderObjectManager.objMap), 'a sender object manager is empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).sendersMap), 'b senders empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).receiversMap), 'b receivers empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).receiverObjectManager.objMap), 'b receiver object manager is empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).senderObjectManager.objMap), 'b sender object manager is empty');
 
     }
 
@@ -69,30 +69,30 @@ define(['../main', '../src/core/core', './Tester', '../src/core/event'], functio
             }
         };
 
-        event.addEventHandler(a, 'hello', b, b.handler);
+        tt.event.addEventHandler(a, 'hello', b, b.handler);
         ctx.assertEquals(count, 0, 'call check');
-        event.raiseEvent(a, 'hello', 13);
+        tt.event.raiseEvent(a, 'hello', 13);
         ctx.assertEquals(count, 1, 'call check');
 
-        ctx.assert(core.isEmpty(a.__event__.sendersMap), 'a senders empty');
-        ctx.assert(!core.isEmpty(a.__event__.receiversMap), 'a receivers not empty');
-        ctx.assert(!core.isEmpty(a.__event__.receiverObjectManager.objMap), 'a receiver object manager is not empty');
-        ctx.assert(core.isEmpty(a.__event__.senderObjectManager.objMap), 'a sender object manager is empty');
-        ctx.assert(!core.isEmpty(b.__event__.sendersMap), 'b senders not empty');
-        ctx.assert(core.isEmpty(b.__event__.receiversMap), 'b receivers empty');
-        ctx.assert(core.isEmpty(b.__event__.receiverObjectManager.objMap), 'b receiver object manager is empty');
-        ctx.assert(!core.isEmpty(b.__event__.senderObjectManager.objMap), 'b sender object manager is not empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).sendersMap), 'a senders empty');
+        ctx.assert(!tt.core.isEmpty(tt.event.getEventData(a).receiversMap), 'a receivers not empty');
+        ctx.assert(!tt.core.isEmpty(tt.event.getEventData(a).receiverObjectManager.objMap), 'a receiver object manager is not empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).senderObjectManager.objMap), 'a sender object manager is empty');
+        ctx.assert(!tt.core.isEmpty(tt.event.getEventData(b).sendersMap), 'b senders not empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).receiversMap), 'b receivers empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).receiverObjectManager.objMap), 'b receiver object manager is empty');
+        ctx.assert(!tt.core.isEmpty(tt.event.getEventData(b).senderObjectManager.objMap), 'b sender object manager is not empty');
 
-        event.delete(b);
+        tt.event.delete(b);
 
-        ctx.assert(core.isEmpty(a.__event__.sendersMap), 'a senders empty');
-        ctx.assert(core.isEmpty(a.__event__.receiversMap), 'a receivers empty');
-        ctx.assert(core.isEmpty(a.__event__.receiverObjectManager.objMap), 'a receiver object manager is empty');
-        ctx.assert(core.isEmpty(a.__event__.senderObjectManager.objMap), 'a sender object manager is empty');
-        ctx.assert(core.isEmpty(b.__event__.sendersMap), 'b senders empty');
-        ctx.assert(core.isEmpty(b.__event__.receiversMap), 'b receivers empty');
-        ctx.assert(core.isEmpty(b.__event__.receiverObjectManager.objMap), 'b receiver object manager is empty');
-        ctx.assert(core.isEmpty(b.__event__.senderObjectManager.objMap), 'b sender object manager is empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).sendersMap), 'a senders empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).receiversMap), 'a receivers empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).receiverObjectManager.objMap), 'a receiver object manager is empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(a).senderObjectManager.objMap), 'a sender object manager is empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).sendersMap), 'b senders empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).receiversMap), 'b receivers empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).receiverObjectManager.objMap), 'b receiver object manager is empty');
+        ctx.assert(tt.core.isEmpty(tt.event.getEventData(b).senderObjectManager.objMap), 'b sender object manager is empty');
 
     }
 
@@ -205,20 +205,20 @@ define(['../main', '../src/core/core', './Tester', '../src/core/event'], functio
 
         var createModelNode = function (model) {
             tt.initProperty(model, 'label');
-            return tt.createNode({
+            return tt.createTtNode({
                 type: 'div',
                 children: [
-                    tt.createNode({
+                    tt.createTtNode({
                         type: 'div',
-                        text: { obj: model, propertyName: 'label' }
+                        text: function () { return model.getLabel(); }
                     }),
-                    tt.createNode({
+                    tt.createTtNode({
                         type: 'ul',
                         children: tt.createMappedList(model.children, function (child) {
                             tt.initProperty(child, 'label');
-                            return tt.createNode({
+                            return tt.createTtNode({
                                 type: 'li',
-                                text: { obj: child, propertyName: 'label' }
+                                text: function () { return child.getLabel(); }
                             });
                         })
                     })

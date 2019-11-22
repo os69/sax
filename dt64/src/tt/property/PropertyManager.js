@@ -9,6 +9,9 @@ define(['../../core/core', '../../core/event', '../util', './Property', './Calcu
         },
 
         initProperty: function (propertyName) {
+            if (this.properties[propertyName]) {
+                return;
+            }
             if (!this.obj.__dict) {
                 util.decorateProperty(this.obj, propertyName);
             }
@@ -46,6 +49,10 @@ define(['../../core/core', '../../core/event', '../util', './Property', './Calcu
             }
             var property = this.properties[propertyName];
             if (!property) {
+                return;
+            }
+            var methodType = util.methodType(signal);
+            if (methodType !== 'set') {
                 return;
             }
             switch (action) {

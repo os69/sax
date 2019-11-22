@@ -57,7 +57,7 @@ define(['../../core/core', '../../core/decorate', '../../core/event', '../proper
             if (sender !== this.targetList) {
                 return;
             }
-            if (signal !== 'splice' && signal !== 'push') {
+            if (signal !== 'splice' && signal !== 'push' && signal !== 'setLength') {
                 return;
             }
             switch (action) {
@@ -76,7 +76,7 @@ define(['../../core/core', '../../core/decorate', '../../core/event', '../proper
             }
             this.isCalculating = true;
             event.addEventHandler(this.list, 'splice', this, this.spliceHandler);
-            event.addEventHandler(this.list, 'push', this, this.pushHandler);         
+            event.addEventHandler(this.list, 'push', this, this.pushHandler);
             for (var i = 0; i < this.list.length; ++i) {
                 this.adminList.push(this.createAdmin(this.list, this.targetList, i));
             }

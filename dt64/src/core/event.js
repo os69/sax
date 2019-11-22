@@ -1,8 +1,8 @@
 define(['./core', './ObjectManager'], function (core, ObjectManager) {
 
-
-
     var module = {
+
+        eventDataProperty: '__tt_event__',
 
         numHandlers: 0,
 
@@ -31,7 +31,7 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
         },
 
         delete: function (obj) {
-            var eventData = module._getEventData(obj);
+            var eventData = module.getEventData(obj);
             // collect event subscriptions where obj is sender
             var signal, receivers, receiverId, handlers, senders, senderId, i, handler, subscriptions;
             subscriptions = [];
@@ -64,7 +64,7 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
         },
 
         raiseEvent: function (sender, signal, message) {
-            var eventData = module._getEventData(sender);
+            var eventData = module.getEventData(sender);
             var receivers = eventData.receiversMap[signal];
             if (!receivers) {
                 return;
@@ -100,7 +100,7 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
         },
 
         addModificationHandler: function (obj, modificationHandler) {
-            var eventData = module._getEventData(obj);
+            var eventData = module.getEventData(obj);
             if (core.hasObject(eventData.modificationHandlers, modificationHandler)) {
                 return;
             }
@@ -114,17 +114,17 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
                     modificationHandler(action, sender, signal, receiver, handler);
                 }
             }
-            notify(module._getEventData(sender).modificationHandlers);
-            notify(module._getEventData(receiver).modificationHandlers);
+            notify(module.getEventData(sender).modificationHandlers);
+            notify(module.getEventData(receiver).modificationHandlers);
         },
 
-        _getEventData: function (obj) {
-            var eventData = obj.__event__;
+        getEventData: function (obj) {
+            var eventData = obj[this.eventDataProperty];
             if (eventData) {
                 return eventData;
             }
             eventData = module._createEventData();
-            obj.__event__ = eventData;
+            obj[this.eventDataProperty] = eventData;
             return eventData;
         },
 
@@ -140,8 +140,8 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
         },
 
         _addEventReceiverToSender: function (sender, signal, receiver, handler) {
-            var senderEventData = module._getEventData(sender);
-            var receiverEventData = module._getEventData(receiver);
+            var senderEventData = module.getEventData(sender);
+            var receiverEventData = module.getEventData(receiver);
             senderEventData.receiverObjectManager.registerObject(receiverEventData.id, receiver);
             var receivers = senderEventData.receiversMap[signal];
             if (!receivers) {
@@ -159,8 +159,8 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
         },
 
         _removeEventReceiverFromSender: function (sender, signal, receiver, handler) {
-            var senderEventData = module._getEventData(sender);
-            var receiverEventData = module._getEventData(receiver);
+            var senderEventData = module.getEventData(sender);
+            var receiverEventData = module.getEventData(receiver);
             var receivers = senderEventData.receiversMap[signal];
             if (!receivers) {
                 return false;
@@ -184,8 +184,8 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
         },
 
         _senderHasReceiver: function (sender, receiver) {
-            var senderEventData = module._getEventData(sender);
-            var receiverEventData = module._getEventData(receiver);
+            var senderEventData = module.getEventData(sender);
+            var receiverEventData = module.getEventData(receiver);
             for (var signal in senderEventData.receiversMap) {
                 var receivers = senderEventData.receiversMap[signal];
                 var handlers = receivers[receiverEventData.id];
@@ -197,8 +197,8 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
         },
 
         _receiverHasSender: function (receiver, sender) {
-            var senderEventData = module._getEventData(sender);
-            var receiverEventData = module._getEventData(receiver);
+            var senderEventData = module.getEventData(sender);
+            var receiverEventData = module.getEventData(receiver);
             for (var signal in receiverEventData.sendersMap) {
                 var senders = receiverEventData.sendersMap[signal];
                 var handlers = senders[senderEventData.id];
@@ -210,8 +210,8 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
         },
 
         _addEventSenderToReceiver: function (sender, signal, receiver, handler) {
-            var senderEventData = module._getEventData(sender);
-            var receiverEventData = module._getEventData(receiver);
+            var senderEventData = module.getEventData(sender);
+            var receiverEventData = module.getEventData(receiver);
             receiverEventData.senderObjectManager.registerObject(senderEventData.id, sender);
             var senders = receiverEventData.sendersMap[signal];
             if (!senders) {
@@ -229,8 +229,8 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
         },
 
         _removeEventSenderFromReceiver: function (sender, signal, receiver, handler) {
-            var senderEventData = module._getEventData(sender);
-            var receiverEventData = module._getEventData(receiver);
+            var senderEventData = module.getEventData(sender);
+            var receiverEventData = module.getEventData(receiver);
             var senders = receiverEventData.sendersMap[signal];
             if (!senders) {
                 return false;

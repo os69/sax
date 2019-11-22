@@ -14,9 +14,13 @@ define(['../core/event', '../core/decorate', './property/PropertyCollector'], fu
         return methodName[3].toLowerCase() + methodName.slice(4);
     };
 
+    module.methodType = function (methodName) {
+        return methodName.slice(0, 3);
+    };
+
     module.decorateProperty = function (obj, propertyName) {
 
-        var eventData = event._getEventData(obj);
+        var eventData = event.getEventData(obj);
 
         // generate getter
         var getterName = module.methodName('get', propertyName);
