@@ -1,4 +1,4 @@
-define(['../../src/index.js', '../util'], function (tt, util) {
+define(['../../src/index', '../util'], function (tt, util) {
 
     var TreeTtNodeRenderer = tt.core.defineClass({
 
@@ -30,7 +30,7 @@ define(['../../src/index.js', '../util'], function (tt, util) {
                     var sourceId = event.dataTransfer.getData('text/plain');
                     var sourceNode = document.getElementById(sourceId);
                     var sourceTreeNode = sourceNode.__node.data;
-                    this.treeNode.drop(sourceTreeNode);
+                    this.treeNode.drop && this.treeNode.drop(sourceTreeNode);
                 }.bind(this),
                 children: [this.createTitleNode()]
             });

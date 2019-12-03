@@ -34,7 +34,7 @@
 .item-exercise-name{
     padding-left: 1rem;
     padding-right: 1rem;
-    
+    width: 10rem;
 }
 
 .tree-node-header-label{

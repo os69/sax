@@ -22,12 +22,9 @@
 
     <script>
         require.config({
-            baseUrl: '/samples/sports',
-            paths: {
-                sports : '.'
-            }
+            baseUrl: '../..',
         });
-        require(['./sports'], function () { });
+        require(['./samples/sports/sports'], function () { });
     </script>
 
 </body>

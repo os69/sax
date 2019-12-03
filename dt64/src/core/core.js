@@ -123,6 +123,11 @@ define([], function () {
             return obj1;
         },
 
+        cloneExtend: function (obj1, obj2) {
+            var clone = this.extend({}, obj1);
+            return this.extend(clone, obj2);
+        },
+
         isEmpty: function (obj) {
             for (var prop in obj) {
                 return false;

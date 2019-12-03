@@ -1,42 +1,57 @@
-define(['../../src/index', './ExerciseCollection', './WorkoutCollection', './exercise', './workout', '../../controls/tree/tree', '../../controls/util','./model/test'], function (tt, ExerciseCollection, WorkoutCollection, exerciseUi, workoutUi, tree, controlsUtil) {
-//define(['../../src/core/core', './modelx/test'], function (tt, ExerciseCollection, WorkoutCollection, exerciseUi, workoutUi, tree, controlsUtil) {
+define(['../../src/index', './model/Db', './model/Root', './model/ExerciseCollection', './model/WorkoutCollection', './model/MovementCollection', './ui/desktop/desktopUI', './ui/mobile/mobileUI'],
+    function (tt, Db, Root, ExerciseCollection, WorkoutCollection, MovementCollection, desktopUI, mobileUI) {
 
-   var createModel = function () {
-        var model = {};
+        var model = tt.core.defineClass({
 
-        // exercise
-        model.exerciseCollection = new ExerciseCollection({ name: 'All Exercises' });
-        var exercise1 = model.exerciseCollection.createExerciseBasic({ name: 'Liegestützen' });
-        var exercise2 = model.exerciseCollection.createExerciseBasic({ name: 'Bankdrücken' });
+            init: function () {
+                this.db = new Db();
+                tt.initProperty(this, 'root');
+                this.setRoot(this.createRoot());
+            },
 
-        // workout
-        model.workoutCollection = new WorkoutCollection({ name: 'All Workouts' });
-        var workout = model.workoutCollection.createWorkoutBasic({ name: 'Basic' });
-        workout.createItem({ name: 'Übung 1', exercise: exercise1, count: 10 });
-        workout.createItem({ name: 'Übung 2', exercise: exercise2, count: 5 });
-        workout = model.workoutCollection.createWorkoutBasic({ name: 'Hard' });
-        workout.createItem({ name: 'Übung 1', exercise: exercise1, count: 20 });
-        workout.createItem({ name: 'Übung 2', exercise: exercise2, count: 10 });
+            createRoot: function () {
 
-        return model;
-    };
+                // root exercise collection
+                var exerciseCollection = new ExerciseCollection({ name: 'All Exercises' });
+                var exercise1 = exerciseCollection.createExerciseBasic({ name: 'Liegestützen' });
+                var exercise2 = exerciseCollection.createExerciseBasic({ name: 'Bankdrücken' });
 
+                // root workout collection
+                var workoutCollection = new WorkoutCollection({ name: 'All Workouts' });
+                var workout = workoutCollection.createWorkoutBasic({ name: 'Basic' });
+                workout.createItem({ name: 'Übung 1', exercise: exercise1, count: 10 });
+                workout.createItem({ name: 'Übung 2', exercise: exercise2, count: 5 });
+                workout = workoutCollection.createWorkoutBasic({ name: 'Hard' });
+                workout.createItem({ name: 'Übung 1', exercise: exercise1, count: 20 });
+                workout.createItem({ name: 'Übung 2', exercise: exercise2, count: 10 });
 
-    var model = createModel();
+                // root movement
+                var movementCollection = new MovementCollection({ name: 'All Movement' });
 
-    var rootContainer = document.getElementById('rootContainer');
+                // root
+                return new Root({ exercise: exerciseCollection, workout: workoutCollection, movement: movementCollection });
 
-    rootContainer.appendChild(controlsUtil.createWidgetTtNode({
-        header: 'All',
-        body: [tt.createTtNode({
+            },
+
+            load: function () {
+                this.db.load('db.json').then(function (root) {
+                    this.setRoot(root);
+                }.bind(this));
+            },
+
+            save: function () {
+                this.db.save('db.json', this.getRoot()).then(function () {
+                    //alert('saved');
+                })
+            }
+
+        });
+
+        var model = new model();
+        document.getElementById('rootContainer').appendChild(tt.createTtNode({
             type: 'div',
-            css: ['content'],
-            children: [tree.createTreeTtNode({
-                labelTtNodes: [controlsUtil.createLabelTtNode('root')],
-                childNodes: [
-                    exerciseUi.createExerciseTreeNode(model.exerciseCollection),
-                    workoutUi.createWorkoutTreeNode(model.workoutCollection)]
-            })]
-        })]
-    }).getDomNode());
-});
+            children: [desktopUI.createTtNode(model), mobileUI.createTtNode(model)]
+        }).getDomNode());
+
+
+    });

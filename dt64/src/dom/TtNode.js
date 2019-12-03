@@ -111,7 +111,9 @@ define(['../core/core', '../core/event', '../tt/property/index', '../tt/list/ind
             event.addEventHandler(this.children, 'splice', this, this.spliceChildren);
             this.initChildren = false;
             while (this.domNode.firstChild) {
-                this.domNode.removeChild(this.domNode.firstChild);
+                var domChildNode = this.domNode.firstChild;
+                this.domNode.removeChild(domChildNode);
+                domChildNode.__node.delete();
             }
             for (var i = 0; i < this.children.length; ++i) {
                 var child = this.children[i];
