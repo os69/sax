@@ -50,7 +50,7 @@ define(['../../src/index', './model/Db', './model/Root', './model/ExerciseCollec
         var model = new model();
         document.getElementById('rootContainer').appendChild(tt.createTtNode({
             type: 'div',
-            children: [desktopUI.createTtNode(model), mobileUI.createTtNode(model)]
+            children: [desktopUI.createTtNode(model), mobileUI.createTtNode({ model: model })]
         }).getDomNode());
 
 
