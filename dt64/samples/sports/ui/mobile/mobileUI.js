@@ -1,39 +1,23 @@
-define(['../../../../src/index', './workout'], function (tt, workoutUI) {
-
-    var MobileUITtNodeRenderer = tt.core.defineClass({
-
-        init: function (model) {
-            this.model = model;
-            tt.initProperty(this, 'workout');
-        },
-
-        render: function () {
-            return tt.createTtNode({
-                type: 'div',
-                children: function () {
-                    var root = this.model.getRoot();
-                    var workout = this.getWorkout();
-                    if (!workout) {
-                        workout = root.workout;
-                    }
-                    return [
-                        tt.createTtNode({
-                            type: 'button',
-                            text: 'up',
-                            click: function () {
-                                var workout = this.getWorkout();
-                                this.setWorkout(workout.parent);
-                            }.bind(this)
-                        }),
-                        workoutUI.createWorkoutTtNode({ workout: workout, ui: this })]
-                }.bind(this)
-            });
-        },
-
-    });
+define(['../../../../src/index', './workoutBrowser'], function (tt, workoutBrowser) {
 
     return {
-        createTtNode: tt.createTtNodeCreator(MobileUITtNodeRenderer)
+        createTtNode: tt.createTtNodeCreator({
+            init: function (model) {
+                this.model = model;
+                this.mode = 'workout-browser';
+                tt.initProperty(this,'mode');
+            },
+            render: function () {
+                return tt.createTtNode({
+                    type: 'div',
+                    children: function () {
+                        var root = this.model.getRoot();
+                        var mode = this.getMode();
+                        return [workoutBrowser.createTtNode({ root: root, ui: this })];
+                    }.bind(this)
+                });
+            }
+        })
     };
 
 });
