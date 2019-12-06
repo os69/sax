@@ -1,0 +1,12 @@
+.workout-browser-workout {
+    border-color: black;
+    border-width: 1px;
+    border-top-style: solid;
+    border-left-style: solid;
+    border-right-style: solid;
+    height: 5rem;
+}
+
+.workout-browser-workout:last-child {
+    border-bottom-style: solid;
+}

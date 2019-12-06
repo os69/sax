@@ -44,10 +44,11 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
                     }
                 }),
                 tt.createTtNode({
-                    type: 'ul',
+                    type: 'div',                
                     children: tt.createMappedList(params.workout.workouts, function (workout) {
                         return tt.createTtNode({
-                            type: 'li',
+                            type: 'div',
+                            css: ['workout-browser-workout'],
                             text: function () {
                                 tt.initProperty(workout, 'name');
                                 return workout.getName();
