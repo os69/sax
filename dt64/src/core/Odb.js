@@ -158,10 +158,10 @@
                 }
             }
         },
-        postProcessObjects:function(objects){
-            for(var id in objects){
+        postProcessObjects: function (objects) {
+            for (var id in objects) {
                 var object = objects[id];
-                if(object.postDeSerialize){
+                if (object.postDeSerialize) {
                     object.postDeSerialize();
                 }
             }
@@ -348,32 +348,35 @@
     // test
     // =======================================================================
 
-    class Label {
-        constructor(label) {
-            this.label = label
+    var test = function () {
+
+        class Label {
+            constructor(label) {
+                this.label = label
+            }
+            getLabelText() {
+                return this.label;
+            }
         }
-        getLabelText() {
-            return this.label;
-        }
+        Label.prototype.meta = { name: 'Label' };
+
+        var odb = new Odb();
+
+        var obj = {
+            items: [{
+                label: new Label('a')
+            }, {
+                label: new Label('b')
+            }]
+        };
+        obj.ref = obj.items[1];
+
+        var json = odb.toJson(obj);
+        console.log(json);
+        var dObj = odb.fromJson(json);
+        console.log(dObj);
+
     }
-    Label.prototype.meta = { name: 'Label' };
-
-
-    var odb = new Odb();
-
-    var obj = {
-        items: [{
-            label: new Label('a')
-        }, {
-            label: new Label('b')
-        }]
-    };
-    obj.ref = obj.items[1];
-
-    var json = odb.toJson(obj);
-    console.log(json);
-    var dObj = odb.fromJson(json);
-    console.log(dObj);
 
     window.Odb = Odb;
 })();

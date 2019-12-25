@@ -29,7 +29,7 @@ define(['../../src/index', '../util'], function (tt, util) {
                     }
                     var sourceId = event.dataTransfer.getData('text/plain');
                     var sourceNode = document.getElementById(sourceId);
-                    var sourceTreeNode = sourceNode.__node.data;
+                    var sourceTreeNode = sourceNode.__ttNode.data;
                     this.treeNode.drop && this.treeNode.drop(sourceTreeNode);
                 }.bind(this),
                 children: [this.createTitleNode()]

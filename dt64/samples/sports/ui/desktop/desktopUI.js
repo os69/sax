@@ -1,5 +1,5 @@
-define(['../../../../src/index', './exercise', './workout', './movement', '../../../../controls/tree/tree', '../../../../controls/util'],
-    function (tt, exerciseUi, workoutUi, movementUi, tree, controlsUtil) {
+define(['../../../../src/index', '../../model/WorkoutItem', './exercise', './workout', './movement', '../../../../controls/tree/tree', '../../../../controls/util'],
+    function (tt, WorkoutItem, exerciseUi, workoutUi, movementUi, tree, controlsUtil) {
 
         var DesktopUITtNodeRenderer = tt.core.defineClass({
 
@@ -104,12 +104,9 @@ define(['../../../../src/index', './exercise', './workout', './movement', '../..
                         if (deleted) {
                             return body;
                         }
-                        body.push(tt.createTtNode({
-                            type: 'div',
-                            text: function () {
-                                return detail.getName();
-                            }
-                        }));
+                        if (detail instanceof WorkoutItem) {
+                            body.push(workoutUi.createWorkoutItemDetailTtNode({ item: detail }));
+                        }
                         return body;
                     }.bind(this)
                 })

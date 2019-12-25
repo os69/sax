@@ -8,7 +8,7 @@ define(['../core/core', '../core/decorate', '../main/property'], function (core,
         init: function (params) {
 
             this.domNode = document.createElement(params.type);
-            this.domNode.__node = this;
+            this.domNode.__ttNode = this;
 
             // text
             if (params.text) {

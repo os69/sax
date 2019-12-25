@@ -1,4 +1,4 @@
-define(['../../../../src/index', './workoutBrowser'], function (tt, workoutBrowser) {
+define(['../../../../src/index', './workoutBrowser', './workoutRunner'], function (tt, workoutBrowser, workoutRunner) {
 
     var module = {
 
@@ -7,6 +7,15 @@ define(['../../../../src/index', './workoutBrowser'], function (tt, workoutBrows
                 this.model = params.model;
                 this.mode = 'workout-browser';
                 tt.initProperty(this, 'mode');
+            },
+            runWorkout: function (workout) {
+                console.log('run', workout);
+                this.workoutParameter = workout;
+                this.setMode('workout-runner');
+            },
+            showWorkout: function (workout) {
+                this.workoutParameter = workout;
+                this.setMode('workout-browser');
             },
             render: function () {
                 return tt.createTtNode({
@@ -18,12 +27,17 @@ define(['../../../../src/index', './workoutBrowser'], function (tt, workoutBrows
                             type: 'div',
                             children: function () {
                                 var mode = this.getMode();
+                                var children;
                                 switch (mode) {
                                     case 'workout-browser':
-                                        return [workoutBrowser.createTtNode({ root: root, ui: this })]
-                                    case 'workout-execution':
+                                        children = [workoutBrowser.createTtNode({ root: root, workout: this.workoutParameter, mobileUi: this })]
+                                        break;
+                                    case 'workout-runner':
+                                        children = [workoutRunner.createTtNode({ workout: this.workoutParameter, mobileUi: this })];
                                         break;
                                 }
+                                this.workoutParameter = null;
+                                return children;
                             }.bind(this)
                         })];
                     }.bind(this)

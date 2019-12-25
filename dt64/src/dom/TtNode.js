@@ -10,7 +10,7 @@ define(['../core/core', '../core/event', '../tt/property/index', '../tt/list/ind
 
             // create dom node
             this.domNode = document.createElement(params.type);
-            this.domNode.__node = this;
+            this.domNode.__ttNode = this;
 
             // parse properties
             for (var propertyName in params) {
@@ -36,6 +36,7 @@ define(['../core/core', '../core/event', '../tt/property/index', '../tt/list/ind
         },
 
         delete: function () {
+            this.domNode.parentNode.removeChild(this.domNode);
             if (this.children) {
                 for (var i = 0; i < this.children.length; ++i) {
                     var child = this.children[i];
@@ -94,6 +95,9 @@ define(['../core/core', '../core/event', '../tt/property/index', '../tt/list/ind
                 this.domNode.innerText = value;
                 return;
             }
+            if (name === '_type') {
+                name = 'type';
+            }
             this.domNode.setAttribute(name, value);
         },
 
@@ -112,8 +116,7 @@ define(['../core/core', '../core/event', '../tt/property/index', '../tt/list/ind
             this.initChildren = false;
             while (this.domNode.firstChild) {
                 var domChildNode = this.domNode.firstChild;
-                this.domNode.removeChild(domChildNode);
-                domChildNode.__node.delete();
+                domChildNode.__ttNode.delete();
             }
             for (var i = 0; i < this.children.length; ++i) {
                 var child = this.children[i];
@@ -146,9 +149,8 @@ define(['../core/core', '../core/event', '../tt/property/index', '../tt/list/ind
             var numDel = spliceArgs[1];
             var insertNodes = spliceArgs.slice(2);
             for (var i = 0; i < numDel; ++i) {
-                var domChildNode = this.domNode.children[index];
-                this.domNode.removeChild(domChildNode);
-                domChildNode.__node.delete();
+                var domChildNode = this.domNode.children[index];               
+                domChildNode.__ttNode.delete();
             }
             for (i = 0; i < insertNodes.length; ++i) {
                 var insertNode = insertNodes[i];

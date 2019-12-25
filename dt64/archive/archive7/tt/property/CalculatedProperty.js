@@ -6,6 +6,7 @@ define(['../../core/core', './PropertyCollector', '../../core/event', '../util',
             this.calc = params.calc;
             this.callback = params.callback;
             this.dependencies = [];
+            this.isCalculating = false;
             if (params.start) {
                 this.start();
             }
@@ -25,6 +26,10 @@ define(['../../core/core', './PropertyCollector', '../../core/event', '../util',
             this.active = false;
         },
         calculate: function () {
+            if (this.isCalculating) {
+                return;
+            }
+            this.isCalculating = false;
             var propertyCollector = PropertyCollector.create({
                 addCallback: function (dependency) {
                     event.addEventHandler(dependency.obj, util.methodName('set', dependency.propertyName), this, this.calculate);
@@ -34,6 +39,7 @@ define(['../../core/core', './PropertyCollector', '../../core/event', '../util',
             var dependencies = propertyCollector.stop();
             this.updateDependencyChangedEventHandlers(dependencies);
             this.callback(value);
+            this.isCalculating = false;
         },
         updateDependencyChangedEventHandlers: function (dependencies) {
             // helper

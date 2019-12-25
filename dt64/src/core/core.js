@@ -112,6 +112,10 @@ define([], function () {
             list.splice.apply(list, args);
         },
 
+        removeAll: function (list) {
+            module.splice(list, 0, list.length);
+        },
+
         // ===================================================================
         // object helpers
         // ===================================================================

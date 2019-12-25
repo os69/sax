@@ -6,28 +6,35 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
 
         numHandlers: 0,
 
+        getNumberHandlers: function () {
+            return module.numHandlers;
+        },
+
         addEventHandler: function (sender, signal, receiver, handler) {
+            if (module._senderHasSignalReceiver(sender, signal, receiver)) {
+                return;
+            }
+            module._notifyModificationHandlers('add', sender, signal, receiver, handler);
             var success1 = module._addEventSenderToReceiver(sender, signal, receiver, handler);
             var success2 = module._addEventReceiverToSender(sender, signal, receiver, handler);
-            if (success1 !== success2) {
+            if (!success1 || !success2) {
                 throw 'program error';
             }
-            if (success1) {
-                this.numHandlers++;
-                module._notifyModificationHandlers('add', sender, signal, receiver, handler);
-            }
+            this.numHandlers++;
         },
 
         removeEventHandler: function (sender, signal, receiver, handler) {
+            if (!module._senderHasSignalReceiver(sender, signal, receiver)) {
+                return;
+            }
+            module._notifyModificationHandlers('remove', sender, signal, receiver, handler);
+
             var success1 = module._removeEventSenderFromReceiver(sender, signal, receiver, handler);
             var success2 = module._removeEventReceiverFromSender(sender, signal, receiver, handler);
-            if (success1 !== success2) {
+            if (!success1 || !success2) {
                 throw 'program error';
             }
-            if (success1) {
-                this.numHandlers--;
-                module._notifyModificationHandlers('remove', sender, signal, receiver, handler);
-            }
+            this.numHandlers--;
         },
 
         delete: function (obj) {
@@ -196,6 +203,20 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
             return false;
         },
 
+        _senderHasSignalReceiver: function (sender, signal, receiver) {
+            var senderEventData = module.getEventData(sender);
+            var receiverEventData = module.getEventData(receiver);
+            var receivers = senderEventData.receiversMap[signal];
+            if (!receivers) {
+                return false;
+            }
+            var handlers = receivers[receiverEventData.id];
+            if (!handlers) {
+                return false;
+            }
+            return true;
+        },
+
         _receiverHasSender: function (receiver, sender) {
             var senderEventData = module.getEventData(sender);
             var receiverEventData = module.getEventData(receiver);
@@ -205,6 +226,20 @@ define(['./core', './ObjectManager'], function (core, ObjectManager) {
                 if (handlers) {
                     return true;
                 }
+            }
+            return false;
+        },
+
+        _receiverHasSignalSender: function (receiver, signal, sender) {
+            var senderEventData = module.getEventData(sender);
+            var receiverEventData = module.getEventData(receiver);
+            var senders = receiverEventData.sendersMap[signal];
+            if (!senders) {
+                return false;
+            }
+            var handlers = senders[senderEventData.id];
+            if (!handlers) {
+                return false;
             }
             return false;
         },

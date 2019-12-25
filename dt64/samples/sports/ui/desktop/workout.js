@@ -2,11 +2,37 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
 
     var module = {};
 
-    module.createWorkoutItemDetailNode = function (item) {
-        tt.initProperty(item, 'name');
+    module.createWorkoutItemDetailTtNode = function (params) {
+        tt.initProperty(params.item, 'count');
+        tt.initProperty(params.item, 'duration');
         return tt.createTtNode({
-            type: 'span',
-            text: function (item) { item.getName(); }
+            type: 'div',
+            children: [
+                tt.createTtNode({
+                    type: 'div',
+                    text: function () {
+                        return params.item.getName();
+                    }
+                }),
+                tt.createTtNode({
+                    type: 'input',
+                    value: function () {
+                        return params.item.getCount();
+                    },
+                    change: function(){
+                        params.item.setCount(event.srcElement.value); 
+                    }
+                }),
+                tt.createTtNode({
+                    type: 'input',
+                    value: function () {
+                        return params.item.getDuration();
+                    },
+                    change: function(){
+                        params.item.setDuration(event.srcElement.value); 
+                    }
+                })
+            ]
         });
     };
 

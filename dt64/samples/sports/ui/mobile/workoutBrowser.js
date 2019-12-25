@@ -10,17 +10,40 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
             type: 'div',
             children: [
                 tt.createTtNode({
-                    type: 'span',
-                    text: function () {
-                        tt.initProperty(params.workout, 'name');
-                        return params.workout.getName();
-                    }
+                    type: 'div',
+                    css: ['workout-browser-workout'],
+                    children: [
+                        tt.createTtNode({
+                            type: 'span',
+                            text: function () {
+                                tt.initProperty(params.workout, 'name');
+                                return params.workout.getName();
+                            }
+                        }),
+                        tt.createTtNode({
+                            type: 'button',
+                            text: 'Run',
+                            css: ['workout-run-button'],
+                            click: function () {
+                                params.mobileUi.runWorkout(params.workout);
+                            }.bind(this)
+                        })
+                    ]
                 }),
                 tt.createTtNode({
-                    type: 'ul',
+                    type: 'div',
+                    css: ['workout-browser-workout'],
+                    text: '..',
+                    click: function () {
+                        params.ui.setWorkout(params.workout.parent);
+                    }.bind(this)
+                }),
+                tt.createTtNode({
+                    type: 'div',
                     children: tt.createMappedList(params.workout.items, function (item) {
                         return tt.createTtNode({
-                            type: 'li',
+                            type: 'div',
+                            css: ['workout-browser-workout'],
                             text: function () {
                                 tt.initProperty(item, 'name');
                                 return item.getName();
@@ -37,14 +60,23 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
             type: 'div',
             children: [
                 tt.createTtNode({
-                    type: 'span',
+                    type: 'div',
+                    css: ['workout-browser-workout'],
                     text: function () {
                         tt.initProperty(params.workout, 'name');
                         return params.workout.getName();
                     }
                 }),
                 tt.createTtNode({
-                    type: 'div',                
+                    type: 'div',
+                    css: ['workout-browser-workout'],
+                    text: '..',
+                    click: function () {
+                        params.ui.setWorkout(params.workout.parent);
+                    }.bind(this)
+                }),
+                tt.createTtNode({
+                    type: 'div',
                     children: tt.createMappedList(params.workout.workouts, function (workout) {
                         return tt.createTtNode({
                             type: 'div',
@@ -65,8 +97,13 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
 
     module.createTtNode = tt.createTtNodeCreator({
         init: function (params) {
-            this.ui = params.ui;
-            this.workout = params.root.workout;
+            this.mobileUi = params.mobileUi;
+            this.root = params.root;
+            if (params.workout) {
+                this.workout = params.workout;
+            } else {
+                this.workout = this.root.workout;
+            }
             tt.initProperty(this, 'workout');
         },
         render: function () {
@@ -74,16 +111,13 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
                 type: 'div',
                 children: function () {
                     var workout = this.getWorkout();
-                    return [
-                        tt.createTtNode({
-                            type: 'button',
-                            text: 'up',
-                            click: function () {
-                                this.setWorkout(workout.parent)
-                            }.bind(this)
-                        }),
-                        workout.workouts ? module.createWorkoutCollectionTtNode({ workout: workout, ui: this }) : module.createWorkoutBasicTtNode({ workout: workout, ui: this })
-                    ];
+                    var children = [];
+                    if (workout.workouts) {
+                        children.push(module.createWorkoutCollectionTtNode({ mobileUi: this.mobileUi, ui: this, workout: workout }));
+                    } else {
+                        children.push(module.createWorkoutBasicTtNode({ mobileUi: this.mobileUi, ui: this, workout: workout }));
+                    }
+                    return children;
                 }.bind(this)
             })
         }

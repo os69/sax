@@ -10,12 +10,17 @@ define(['../../core/core', '../../core/event', './ListManager', '../property/Cal
         },
 
         calculate: function () {
+            if (this.isCalculating) {
+                return false;
+            }
+            this.isCalculating = false;
             core.removeAll(this.targetList);
             event.addEventHandler(this.list, 'splice', this, this.spliceHandler);
             event.addEventHandler(this.list, 'push', this, this.pushHandler);
             for (var i = 0; i < this.list.length; ++i) {
                 this.adminList.push(this.createAdmin(this.list, this.targetList, i));
             }
+            this.isCalculating = false;
         },
 
         createAdmin: function (list, targetList, index) {
@@ -38,6 +43,9 @@ define(['../../core/core', '../../core/event', './ListManager', '../property/Cal
         },
 
         spliceHandler: function (signal, spliceArgs) {
+            if (this.isCalculating) {
+                return;
+            }
             var index = spliceArgs[0];
             var numDel = spliceArgs[1];
             var insertElements = spliceArgs.slice(2);

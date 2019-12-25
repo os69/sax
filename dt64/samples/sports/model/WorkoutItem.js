@@ -6,6 +6,7 @@ define(['../../../src/index', './Object'], function (tt, Object) {
             params.name = params.name || params.exercise.name;
             Object.prototype.init.apply(this, arguments);
             this.count = params.count || '1';
+            this.duration = params.duration || '0';
             this.exercise = params.exercise;            
             this.exercise.incItemUsageCounter();
         },
