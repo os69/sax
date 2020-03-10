@@ -11,6 +11,7 @@ define(['../../../src/index', './Workout', './WorkoutBasic'], function (tt, Work
             params.parent = this;
             var workout = new WorkoutCollection(params);
             this.workouts.push(workout);
+            return workout;
         },
 
         createWorkoutBasic: function (params) {
@@ -19,7 +20,6 @@ define(['../../../src/index', './Workout', './WorkoutBasic'], function (tt, Work
             this.workouts.push(workout);
             return workout;
         }
-
 
     });
 

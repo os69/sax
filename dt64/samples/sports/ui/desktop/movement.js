@@ -1,4 +1,4 @@
-define(['../../../../src/index', '../../../../controls/util', '../../model/Movement'], function (tt, controlsUtil, Movement) {
+define(['../../../../src/index', '../../../../controls/util', '../../model/Movement','../../model/Muscle'], function (tt, controlsUtil, Movement, Muscle) {
 
     var module = {};
 
@@ -75,13 +75,41 @@ define(['../../../../src/index', '../../../../controls/util', '../../model/Movem
                     icon: ['fas', 'fa-trash-alt']
                 })
             ],
-            childNodes: [],
+            childNodes: tt.createMappedList(params.movement.muscles, function (muscle) {
+                return module.createMovementMuscleUsageTreeNode({ movement: params.movement, muscle: muscle });
+            }),
             drop: function (droppedTreeNode) {
                 if (droppedTreeNode.movement instanceof Movement) {
                     params.movement.insertBefore(droppedTreeNode.movement);
                     return;
                 }
+                if (droppedTreeNode.muscle instanceof Muscle) {
+                    params.movement.addMuscle(droppedTreeNode.muscle);
+                    return;
+                }
             }
+        };
+    };
+
+    module.createMovementMuscleUsageTreeNode = function (params) {
+        tt.initProperty(params.muscle, 'name');
+        return {
+            movement: params.movement,
+            muscle: params.muscle,
+            labelTtNodes: [
+                tt.createTtNode({
+                    type: 'span',
+                    css: ['name-input'],
+                    text: function () { return params.muscle.getName(); }
+                }),
+                controlsUtil.createIconTtNode({
+                    click: function () {
+                        params.movement.removeMuscle(params.muscle);
+                    }.bind(this),
+                    icon: ['fas', 'fa-trash-alt']
+                })
+            ],
+            childNodes: []
         };
     };
 

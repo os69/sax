@@ -47,8 +47,31 @@ define(['../src/index'], function (tt) {
                     })
                 ]
             })
-        }
+        },
 
+        createInputTtNode: function (params) {
+            return tt.createTtNode({
+                type: 'div',
+                css: ['field'],
+                children: [
+                    tt.createTtNode({
+                        type: 'label',
+                        css: ['label'],
+                        text: params.label
+                    }),
+                    tt.createTtNode({
+                        type: 'div',
+                        css: ['control'],                        
+                        children: [tt.createTtNode({
+                            type: 'input',
+                            css: ['input'],
+                            disabled: params.disabled,
+                            value: params.value,
+                            change: params.change
+                        })]
+                    })]
+            });
+        }
     };
 
 });

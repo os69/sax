@@ -16,11 +16,11 @@ define(['../../../src/index', './Object'], function (tt, Object) {
         },
 
         delete: function () {
-            if (this.itemUsageCounter > 0) {
-                return;
+            if (!Object.prototype.delete.apply(this, arguments)) {
+                return false;
             }
-            Object.prototype.delete.apply(this, arguments);
             tt.core.removeObject(this.parent.exercises, this);
+            return true;
         },
 
         insertBefore: function (exercise) {

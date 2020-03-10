@@ -17,7 +17,7 @@
             return '#' + (++this.maxId)
         },
         isReference: function (value) {
-            return value[0] === '#';
+            return value && value[0] === '#';
         },
         ignoreProperty: function (property) {
             return property === '__admin__' || property.slice(0, 2) === '__';

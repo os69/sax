@@ -1,4 +1,4 @@
-define(['../../../src/index', './Root', './ExerciseBasic', './ExerciseCollection', './WorkoutBasic', './WorkoutCollection', './WorkoutItem', './MovementBasic', './MovementCollection'], function (tt, Root, ExerciseBasic, ExerciseCollection, WorkoutBasic, WorkoutCollection, WorkoutItem, MovementBasic, MovementCollection) {
+define(['../../../src/index', './Root', './ExerciseBasic', './ExerciseCollection', './WorkoutBasic', './WorkoutCollection', './WorkoutItem', './MovementBasic', './MovementCollection', './MuscleBasic', './MuscleCollection'], function (tt, Root, ExerciseBasic, ExerciseCollection, WorkoutBasic, WorkoutCollection, WorkoutItem, MovementBasic, MovementCollection, MuscleBasic, MuscleCollection) {
 
     var classes = {
         Root: { cls: Root },
@@ -8,7 +8,9 @@ define(['../../../src/index', './Root', './ExerciseBasic', './ExerciseCollection
         WorkoutCollection: { cls: WorkoutCollection },
         WorkoutItem: { cls: WorkoutItem },
         MovementBasic: { cls: MovementBasic },
-        MovementCollection: { cls: MovementCollection }
+        MovementCollection: { cls: MovementCollection },
+        MuscleBasic: { cls: MuscleBasic },
+        MuscleCollection: { cls: MuscleCollection }
     };
 
     return tt.core.defineClass({

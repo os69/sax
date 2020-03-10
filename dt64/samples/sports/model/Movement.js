@@ -2,25 +2,12 @@ define(['../../../src/index', './Object'], function (tt, Object) {
 
     return tt.core.defineDerivedClass(Object, {
 
-        init: function () {
-            Object.prototype.init.apply(this, arguments);
-            this.usageCounter = 0;
-        },
-
-        incUsageCounter: function () {
-            this.usageCounter++;
-        },
-
-        decUsageCounter: function () {
-            this.usageCounter--;
-        },
-
         delete: function () {
-            if (this.usageCounter > 0) {
-                return;
+            if (!Object.prototype.delete.apply(this, arguments)) {
+                return false;
             }
-            Object.prototype.delete.apply(this, arguments);
             tt.core.removeObject(this.parent.movements, this);
+            return true;
         },
 
         insertBefore: function (movement) {

@@ -1,5 +1,5 @@
-define(['../../../src/index', './Db', './Root', './ExerciseCollection', './WorkoutCollection', './MovementCollection'],
-    function (tt, Db, Root, ExerciseCollection, WorkoutCollection, MovementCollection) {
+define(['../../../src/index', './Db', './Root', './ExerciseCollection', './WorkoutCollection', './MovementCollection', './MuscleCollection'],
+    function (tt, Db, Root, ExerciseCollection, WorkoutCollection, MovementCollection, MuscleCollection) {
 
         return tt.core.defineClass({
 
@@ -28,8 +28,11 @@ define(['../../../src/index', './Db', './Root', './ExerciseCollection', './Worko
                 // root movement
                 var movementCollection = new MovementCollection({ name: 'All Movement' });
 
+                // root muscle
+                var muscleCollection = new MuscleCollection({ name: 'All Muscles' });
+
                 // root
-                return new Root({ exercise: exerciseCollection, workout: workoutCollection, movement: movementCollection });
+                return new Root({ exercise: exerciseCollection, workout: workoutCollection, movement: movementCollection, muscle: muscleCollection });
 
             },
 

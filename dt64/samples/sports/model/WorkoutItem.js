@@ -5,16 +5,28 @@ define(['../../../src/index', './Object'], function (tt, Object) {
         init: function (params) {
             params.name = params.name || params.exercise.name;
             Object.prototype.init.apply(this, arguments);
-            this.count = params.count || '1';
-            this.duration = params.duration || '0';
-            this.exercise = params.exercise;            
+            this.count = params.count || 1;
+            this.duration = params.duration || 0;
+            this.exercise = params.exercise;
             this.exercise.incItemUsageCounter();
+            this.postDeSerialize();
+        },
+
+        postDeSerialize: function () {
+            tt.initProperty(this, 'count');
+            tt.initProperty(this, 'duration');
+            tt.createCalculatedProperty(this, 'totalDuration', function () {
+                return this.getDuration() * this.getCount();
+            }.bind(this));
         },
 
         delete: function () {
+            if (!Object.prototype.delete.apply(this, arguments)) {
+                return false;
+            }
             this.exercise.decItemUsageCounter();
-            Object.prototype.delete.apply(this, arguments);
             tt.core.removeObject(this.parent.items, this);
+            return true;
         },
 
         insertBefore: function (item) {

@@ -6,6 +6,15 @@ define(['../../../src/index'], function (tt) {
             this.name = params.name;
             this.parent = params.parent;
             this.deleted = false;
+            this.usageCounter = 0;
+        },
+
+        incUsageCounter: function () {
+            this.usageCounter++;
+        },
+
+        decUsageCounter: function () {
+            this.usageCounter--;
         },
 
         getName: function () {
@@ -21,8 +30,17 @@ define(['../../../src/index'], function (tt) {
         },
 
         delete: function () {
+            if (this.isRoot() || this.parent.isRoot() || this.usageCounter > 0) {
+                return false;
+            }
             this.setDeleted(true);
+            return true;
+        },
+
+        isRoot: function () {
+            return false;
         }
+
 
     });
 

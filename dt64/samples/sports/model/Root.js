@@ -10,6 +10,12 @@ define(['../../../src/index', './Object'], function (tt, Object) {
             this.workout.parent = this;
             this.movement = params.movement;
             this.movement.parent = this;
+            this.muscle = params.muscle;
+            this.muscle.parent = this;
+        },
+
+        isRoot: function () {
+            return true;
         }
 
     });

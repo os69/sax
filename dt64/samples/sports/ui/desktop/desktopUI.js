@@ -1,5 +1,5 @@
-define(['../../../../src/index', '../../model/WorkoutItem', './exercise', './workout', './movement', '../../../../controls/tree/tree', '../../../../controls/util'],
-    function (tt, WorkoutItem, exerciseUi, workoutUi, movementUi, tree, controlsUtil) {
+define(['../../../../src/index', '../../model/WorkoutItem', '../../model/WorkoutBasic', './exercise', './workout', './movement', './muscle', '../../../../controls/tree/tree', '../../../../controls/util'],
+    function (tt, WorkoutItem, WorkoutBasic, exerciseUi, workoutUi, movementUi, musclesUi, tree, controlsUtil) {
 
         var DesktopUITtNodeRenderer = tt.core.defineClass({
 
@@ -64,7 +64,7 @@ define(['../../../../src/index', '../../model/WorkoutItem', './exercise', './wor
 
             createTreeTtNode: function () {
 
-                var rootChildNodes = tt.createMappedList([0, 1, 2], function (index) {
+                var rootChildNodes = tt.createMappedList([0, 1, 2, 3], function (index) {
                     var root = this.model.getRoot();
                     switch (index) {
                         case 0:
@@ -73,6 +73,8 @@ define(['../../../../src/index', '../../model/WorkoutItem', './exercise', './wor
                             return workoutUi.createWorkoutTreeNode({ workout: root.workout, ui: this });
                         case 2:
                             return movementUi.createMovementTreeNode({ movement: root.movement, ui: this });
+                        case 3:
+                            return musclesUi.createMuscleTreeNode({ muscle: root.muscle, ui: this });
                     }
                 }.bind(this));
 
@@ -106,6 +108,9 @@ define(['../../../../src/index', '../../model/WorkoutItem', './exercise', './wor
                         }
                         if (detail instanceof WorkoutItem) {
                             body.push(workoutUi.createWorkoutItemDetailTtNode({ item: detail }));
+                        }
+                        if (detail instanceof WorkoutBasic) {
+                            body.push(workoutUi.createWorkoutBasicDetailTtNode({ workout: detail }));
                         }
                         return body;
                     }.bind(this)

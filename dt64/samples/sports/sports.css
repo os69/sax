@@ -31,6 +31,17 @@
   
 }
 
+.item-duration-input{
+    background-color: inherit;
+    border-style: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color:inherit;    
+    width: 3rem;
+  
+}
+
 .item-exercise-name{
     padding-left: 1rem;
     padding-right: 1rem;

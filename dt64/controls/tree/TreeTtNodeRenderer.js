@@ -3,6 +3,7 @@ define(['../../src/index', '../util'], function (tt, util) {
     var TreeTtNodeRenderer = tt.core.defineClass({
 
         init: function (treeNode) {
+            treeNode.childNodes = treeNode.childNodes || [];
             tt.initList(treeNode.childNodes);
             tt.initProperty(treeNode, 'label');
             this.treeNode = treeNode;

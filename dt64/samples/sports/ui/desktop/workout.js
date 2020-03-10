@@ -1,4 +1,4 @@
-define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/Workout', '../../model/WorkoutItem', '../../model/Exercise', '../../../../controls/util'], function (tt, WorkoutCollection, Workout, WorkoutItem, Exercise, controlsUtil) {
+define(['../../../../src/index', '../../model/Workout', '../../model/WorkoutItem', '../../model/ExerciseBasic', '../../../../controls/util', '../time'], function (tt, Workout, WorkoutItem, ExerciseBasic, controlsUtil, time) {
 
     var module = {};
 
@@ -8,29 +8,63 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
         return tt.createTtNode({
             type: 'div',
             children: [
-                tt.createTtNode({
-                    type: 'div',
-                    text: function () {
+                controlsUtil.createInputTtNode({
+                    label: 'name',
+                    value: function () {
                         return params.item.getName();
+                    },
+                    change: function (event) {
+                        params.item.setName(event.srcElement.value);
                     }
                 }),
-                tt.createTtNode({
-                    type: 'input',
+                controlsUtil.createInputTtNode({
+                    label: 'count',
                     value: function () {
-                        return params.item.getCount();
+                        return '' + params.item.getCount();
                     },
-                    change: function(){
-                        params.item.setCount(event.srcElement.value); 
+                    change: function (event) {
+                        params.item.setCount(parseInt(event.srcElement.value));
                     }
                 }),
-                tt.createTtNode({
-                    type: 'input',
+                controlsUtil.createInputTtNode({
+                    label: 'duration',
                     value: function () {
-                        return params.item.getDuration();
+                        return '' + time.int2ext(params.item.getDuration());
                     },
-                    change: function(){
-                        params.item.setDuration(event.srcElement.value); 
+                    change: function (event) {
+                        params.item.setDuration(time.ext2int(event.srcElement.value));
                     }
+                }),
+                controlsUtil.createInputTtNode({
+                    label: 'total',
+                    value: function () {
+                        return '' + time.int2ext(params.item.getTotalDuration());
+                    },
+                    disabled: true
+                }),
+            ]
+        });
+    };
+
+    module.createWorkoutBasicDetailTtNode = function (params) {
+        return tt.createTtNode({
+            type: 'div',
+            children: [
+                controlsUtil.createInputTtNode({
+                    label: 'name',
+                    value: function () {
+                        return params.workout.getName();
+                    },
+                    change: function (event) {
+                        params.workout.setName(event.srcElement.value);
+                    }
+                }),
+                controlsUtil.createInputTtNode({
+                    label: 'total',
+                    value: function () {
+                        return '' + time.int2ext(params.workout.getTotalDuration());
+                    },
+                    disabled: true
                 })
             ]
         });
@@ -39,6 +73,7 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
     module.createWorkoutItemTreeNode = function (params) {
         tt.initProperty(params.item, 'name');
         tt.initProperty(params.item, 'count');
+        tt.initProperty(params.item, 'duration');
         tt.initProperty(params.item, 'exercise');
         tt.initProperty(params.item.exercise, 'name');
         return {
@@ -58,9 +93,17 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
                 tt.createTtNode({
                     type: 'input',
                     css: ['item-count-input'],
-                    value: function () { return params.item.getCount(); },
+                    value: function () { return '' + params.item.getCount(); },
                     change: function (event) {
-                        params.item.setCount(event.srcElement.value);
+                        params.item.setCount(parseInt(event.srcElement.value));
+                    }
+                }),
+                tt.createTtNode({
+                    type: 'input',
+                    css: ['item-duration-input'],
+                    value: function () { return '' + time.int2ext(params.item.getDuration()); },
+                    change: function (event) {
+                        params.item.setDuration(time.ext2int(event.srcElement.value));
                     }
                 }),
                 tt.createTtNode({
@@ -81,7 +124,7 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
                     params.item.insertBefore(droppedTreeNode.item);
                     return;
                 }
-                if (droppedTreeNode.exercise instanceof Exercise) {
+                if (droppedTreeNode.exercise instanceof ExerciseBasic) {
                     params.item.createItemBefore({ exercise: droppedTreeNode.exercise });
                     return;
                 }
@@ -100,6 +143,9 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
                     value: function () { return params.workout.getName(); },
                     change: function (event) {
                         params.workout.setName(event.srcElement.value);
+                    },
+                    click: function () {
+                        params.ui.setDetail(params.workout);
                     }
                 }),
                 controlsUtil.createIconTtNode({
@@ -113,7 +159,7 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
                 return module.createWorkoutItemTreeNode(tt.core.cloneExtend(params, { item: item }));
             }),
             drop: function (droppedTreeNode) {
-                if (droppedTreeNode.exercise instanceof Exercise) {
+                if (droppedTreeNode.exercise instanceof ExerciseBasic) {
                     params.workout.createItem({ exercise: droppedTreeNode.exercise });
                     return;
                 }
@@ -128,7 +174,7 @@ define(['../../../../src/index', '../../model/WorkoutCollection', '../../model/W
     module.createWorkoutCollectionTreeNode = function (params) {
         tt.initProperty(params.workout, 'name');
         return {
-            workout: WorkoutCollection,
+            workout: params.workouts,
             labelTtNodes: [
                 tt.createTtNode({
                     type: 'input',

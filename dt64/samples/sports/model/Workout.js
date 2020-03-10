@@ -3,8 +3,11 @@ define(['../../../src/index', './Object'], function (tt, Object) {
     return tt.core.defineDerivedClass(Object, {
 
         delete: function () {
-            Object.prototype.delete.apply(this, arguments);
+            if (!Object.prototype.delete.apply(this, arguments)) {
+                return false;
+            }
             tt.core.removeObject(this.parent.workouts, this);
+            return true;
         },
 
         insertBefore: function (workout) {

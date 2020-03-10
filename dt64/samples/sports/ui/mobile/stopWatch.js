@@ -4,6 +4,7 @@ define(['../../../../src/index'], function (tt) {
 
         createTtNode: tt.createTtNodeCreator({
             init: function (params) {
+                params.minutes = params.minutes || 0;
                 this.duration = params.minutes * 60 + params.seconds;
                 tt.initProperty(this, 'displayTime');
                 tt.initProperty(this, 'status');
