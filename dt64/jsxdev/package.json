@@ -1,0 +1,21 @@
+{
+  "name": "jsxdev",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build_dev": "npx babel src --out-dir lib -w"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.10.1",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "@babel/preset-react": "^7.10.1"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.10.1"
+  }
+}

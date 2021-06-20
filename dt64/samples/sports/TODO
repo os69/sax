@@ -1,0 +1,15 @@
+-ExerciseBasic                  fas fa-dumbbell
+-ExerciseCollection
+
+
+-WorkoutBasic                   fas fa-walking
+-WorkoutCollection
+
+-WorkoutItem                    fas fa-bicycle
+-WorkoutItemCollection
+
+-MovementBasic                  fas fa-cog
+-MovementCollection
+
+-MuscleBasic                    fas fa-child
+-MuscleCollection

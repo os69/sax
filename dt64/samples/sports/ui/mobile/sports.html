@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sports</title>
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js" data-auto-replace-svg="nest"></script>
+    <!--<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">-->
+    <link rel="stylesheet" type="text/css" href="sports.css">
+    <script src="../../../../tp/require.js"></script>
+</head>
+
+
+<body>
+
+    <div id="rootContainer">
+    </div>
+
+    <script>
+        require.config({
+            baseUrl: '../../../..',
+        });
+        require(['./samples/sports/ui/mobile/mobileUI'], function (mobileUI) {
+            mobileUI.start();
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,197 @@
+/* ==========================================================================*/
+/* general */
+/* ==========================================================================*/
+
+body{
+    background-color:   #454545;
+    color:#ffeb3b;
+    font-family: 'Arial';
+    font-size: 1rem;
+}
+
+.icon{
+    padding-right: 0.5rem;
+}
+
+/* ==========================================================================*/
+/* stop watch */
+/* ==========================================================================*/
+
+.stop-watch{
+    display: flex;
+}
+
+.stop-watch-toggle{
+    margin-right: 1rem;
+}
+
+.stop-watch-reset{
+    margin-right: 1rem;
+}
+/* ==========================================================================*/
+/* fields */
+/* ==========================================================================*/
+
+.field-grow{
+    flex-grow: 1;
+    word-break: break-all;
+}
+.field-grow:not(:first-child){
+    padding-left: 0.5rem;    
+}
+
+.field-2{    
+    flex-grow: 0;    
+    flex-shrink: 0;  
+    flex-basis: 2rem; 
+}
+.field-2:not(:first-child){
+    padding-left: 0.5rem;    
+}
+
+.field-3{    
+    flex-grow: 0;    
+    flex-shrink: 0;  
+    flex-basis: 3rem; 
+}
+.field-3:not(:first-child){
+    padding-left: 0.5rem;    
+}
+
+.field-5{    
+    flex-grow: 0;    
+    flex-shrink: 0;  
+    flex-basis: 5rem; 
+}
+.field-5:not(:first-child){
+    padding-left: 0.5rem;    
+}
+
+.field-10{    
+    flex-grow: 0;    
+    flex-shrink: 0;  
+    flex-basis: 10rem; 
+}
+.field-10:not(:first-child){
+    padding-left: 0.5rem;    
+}
+
+.workout-browser-field-20{    
+    flex-grow: 0;    
+    flex-shrink: 0;  
+    flex-basis: 20rem; 
+}
+.workout-browser-field-20:not(:first-child){
+    padding-left: 0.5rem;    
+}
+
+/* ==========================================================================*/
+/* workout browser */
+/* ==========================================================================*/
+
+.workout-browser-toolbar {
+    font-size: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.8rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.workout-browser-header {
+    font-size: 2rem;
+    padding: 1rem;
+    border-radius: 0.8rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    background-color:#2f2f2f;
+    display: flex;
+    flex-direction: row;
+}
+
+.workout-browser-item{
+    padding: 1rem;
+    border-radius: 0.8rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    background-color:#2f2f2f;
+    display: flex;
+    flex-direction: row;
+}
+
+
+
+/* ==========================================================================*/
+/* workout runner */
+/* ==========================================================================*/
+
+.workout-runner-header {
+    font-size: 2rem;
+    padding: 1rem;
+    border-radius: 0.8rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    background-color:#2f2f2f;
+    display: flex;
+    flex-direction: row;
+}
+
+.workout-runner-toolbar {
+    font-size: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.8rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: row;
+}
+
+.workout-runner-item{  
+    padding: 1rem;
+    border-radius: 0.8rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    background-color:#2f2f2f;
+    display: flex;
+    flex-direction: row;
+    align-items: center;    
+}
+
+.workout-runner-item-checked{
+    background-color: #191919;
+}
+
+.workout-runner-item-checkbox{
+    font-size: 2rem;
+}
+
+.workout-runner-item-lines{
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-left: 1rem;
+}
+
+.workout-runner-item-line1{    
+    display: flex;
+    flex-direction: row;
+    
+}
+
+.workout-runner-item-line2{    
+    display: flex;
+    flex-direction: row;
+    margin-top: 1rem;
+    font-size: 1.5rem;
+}
+
+.stop-watch{
+    margin-left: 1rem;
+}
+
+.workout-runner-item a {
+    color: inherit;
+}
+
+.workout-runner-item a:visited {
+    color: inherit;
+}

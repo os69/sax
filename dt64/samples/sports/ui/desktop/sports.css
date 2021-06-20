@@ -1,0 +1,109 @@
+
+/* general tree */
+
+.tree-node{
+ /*   width:33rem;*/  /* header label + 3rem !! */
+}
+
+.tree-node-header-label{  
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+/*    width: 30rem;*/
+}
+
+.tree-container{
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 40rem;
+}
+
+.object-folder{    
+}
+
+.object-item{
+    opacity: 1;
+}
+
+
+/* workout / workout collection */
+
+.name-input{
+    background-color: inherit;
+    border-style: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color:inherit;    
+    flex-grow: 1;
+}
+
+
+/* workout item */
+
+.item-exercise-name{
+
+    flex-grow: 1;
+    
+}
+
+.item-count-input{
+    background-color: inherit;
+    border-style: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color:inherit;
+
+    flex-basis: 3rem;
+    min-width: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+  
+}
+
+.item-duration-input{
+    background-color: inherit;
+    border-style: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color:inherit;    
+    
+    flex-basis: 3rem;
+    min-width: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+
+  
+}
+
+.item-name-input{
+    background-color: inherit;
+    border-style: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color:inherit;        
+    flex-basis: 5rem;
+    min-width: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+
+}
+
+/* workout item collection */
+
+.item-collection-name-input{
+    background-color: inherit;
+    border-style: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    color:inherit;    
+    flex-basis: 10rem;
+    flex-grow: 0;
+    flex-shrink: 0;    
+}
+
+

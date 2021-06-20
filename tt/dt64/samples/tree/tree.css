@@ -1,0 +1,13 @@
+
+.tree-node-header-label{
+    display: flex;
+    flex-direction: row;
+}
+
+.sample-tree-node-input{
+    margin-left: 0.5rem;
+    background-color: inherit;
+    border-style: none;    
+    flex-grow: 1;
+}
+
